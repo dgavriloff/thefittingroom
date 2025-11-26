@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
@@ -15,6 +16,7 @@ export default function TabThreeScreen() {
   const [selectedClothes, setSelectedClothes] = useState<{ id: string; url: string }[]>([]);
   const [feedItems, setFeedItems] = useState<any[]>([]);
   const [feedLoaded, setFeedLoaded] = useState(false);
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
 
   useEffect(() => {
     const loadFeedItems = async () => {
@@ -113,7 +115,7 @@ export default function TabThreeScreen() {
 
   // Heights for different card types
   const editorCardHeight = topSectionHeight + middleSectionHeight + bottomSectionHeight - 16; // Adjust for removed padding
-  const feedCardHeight = topSectionHeight + middleSectionHeight - 16 + 16; // Adjust for removed padding + extra padding at bottom since no button
+  const feedCardHeight = topSectionHeight + middleSectionHeight - 16 + 16 + 50; // Adjust for removed padding + extra padding at bottom + slider height
   const gap = 24;
 
   // Calculate bottom spacer to allow the last card to be snapped to top
@@ -176,6 +178,15 @@ export default function TabThreeScreen() {
     }, 20);
   };
 
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollTopButton(offsetY > editorCardHeight / 2);
+  };
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -190,10 +201,13 @@ export default function TabThreeScreen() {
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.grid}
-        snapToOffsets={snapOffsets}
-        decelerationRate="fast"
-        snapToAlignment="start"
         showsVerticalScrollIndicator={false}
+        decelerationRate="fast"
+        snapToOffsets={snapOffsets}
+        snapToAlignment="start"
+        snapToEnd={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <EditorCard
           key="editor"
@@ -224,6 +238,14 @@ export default function TabThreeScreen() {
         ))}
         <View style={{ height: bottomSpacerHeight }} />
       </ScrollView>
+
+      {showScrollTopButton && (
+        <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.floatingButtonContainer}>
+          <TouchableOpacity style={styles.floatingButton} onPress={scrollToTop}>
+            <MaterialIcons name="add" size={40} color="#FFFFFF" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -257,5 +279,26 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 24,
     paddingBottom: 50,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+  },
+  floatingButton: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
 });
