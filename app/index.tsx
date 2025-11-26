@@ -197,10 +197,10 @@ export default function TabThreeScreen() {
   };
 
   const handleEdit = async (item: any) => {
-    if (!item.resultImage) return;
+    if (!item.modelImage) return;
 
-    // 1. Set Result Image as Selected Model
-    setSelectedModelImage(item.resultImage);
+    // 1. Set Original Model Image as Selected Model
+    setSelectedModelImage(item.modelImage);
 
     // 2. Set Clothes
     // Reconstruct clothes objects from URLs. We'll generate temporary IDs.

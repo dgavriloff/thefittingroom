@@ -54,7 +54,11 @@ export default function FeedCard({
             />
             {/* Section 1: Large Square - Model or Result */}
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
-                <View style={[styles.topSection, { height: topSectionHeight - 32 }, (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0 } : {}]}>
+                <View style={[
+                    styles.topSection,
+                    { height: topSectionHeight - 32 },
+                    (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0, backgroundColor: '#000000' } : {}
+                ]}>
                     {activeTab === 'input' ? (
                         modelImage ? (
                             <TouchableOpacity onPress={() => handleImagePress(modelImage)} style={{ width: '100%', height: '100%' }}>
@@ -188,7 +192,7 @@ const styles = StyleSheet.create({
     modelImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
+        resizeMode: 'contain',
     },
     placeholderText: {
         fontSize: 18,
