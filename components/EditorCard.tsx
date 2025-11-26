@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface EditorCardProps {
     width: number;
@@ -10,6 +10,10 @@ interface EditorCardProps {
     onPressModel: () => void;
     onPressOutfit: () => void;
     onPressTryOn: () => void;
+    selectedModelImage?: string | null;
+    selectedClothes?: { id: string; url: string }[];
+    onRemoveModel: () => void;
+    onRemoveClothes: (id: string) => void;
 }
 
 export default function EditorCard({
@@ -21,30 +25,59 @@ export default function EditorCard({
     onPressModel,
     onPressOutfit,
     onPressTryOn,
+    selectedModelImage,
+    selectedClothes = [],
+    onRemoveModel,
+    onRemoveClothes,
 }: EditorCardProps) {
     return (
         <View style={[styles.card, { width, height }]}>
             {/* Section 1: Large Square - Add Model Placeholder */}
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
                 <TouchableOpacity
-                    style={[styles.topSection, { height: topSectionHeight - 32 }]}
+                    style={[styles.topSection, { height: topSectionHeight - 32 }, selectedModelImage ? { borderWidth: 0 } : {}]}
                     onPress={onPressModel}
                 >
-                    <MaterialIcons name="add" size={40} color="#BF360C" />
-                    <Text style={styles.placeholderText}>Select Model</Text>
+                    {selectedModelImage ? (
+                        <View style={{ width: '100%', height: '100%' }}>
+                            <Image source={{ uri: selectedModelImage }} style={styles.modelImage} />
+                            <TouchableOpacity
+                                style={styles.removeButton}
+                                onPress={() => onRemoveModel()}
+                            >
+                                <MaterialIcons name="close" size={16} color="#FFF" />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <>
+                            <MaterialIcons name="add" size={40} color="#000000" />
+                            <Text style={styles.placeholderText}>select model</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
             </View>
 
             {/* Section 2: Middle Rectangle with small cards */}
             <View style={[styles.middleSection, { height: middleSectionHeight }]}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.middleScrollContent}>
+                    {selectedClothes.map((item, index) => (
+                        <View key={item.id} style={[styles.smallCard, { borderWidth: 0, overflow: 'hidden' }]}>
+                            <Image source={{ uri: item.url }} style={styles.modelImage} />
+                            <TouchableOpacity
+                                style={styles.removeButton}
+                                onPress={() => onRemoveClothes(item.id)}
+                            >
+                                <MaterialIcons name="close" size={16} color="#FFF" />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
                     {/* Add Outfit Placeholder */}
                     <TouchableOpacity
                         style={[styles.smallCard, styles.addSmallCard]}
                         onPress={onPressOutfit}
                     >
-                        <MaterialIcons name="add" size={24} color="#BF360C" />
-                        <Text style={styles.addSmallCardText}>Add Clothes</Text>
+                        <MaterialIcons name="add" size={24} color="#000000" />
+                        <Text style={styles.addSmallCardText}>add clothes</Text>
                     </TouchableOpacity>
                 </ScrollView>
             </View>
@@ -52,7 +85,7 @@ export default function EditorCard({
             {/* Section 3: Bottom Button */}
             <View style={[styles.bottomSection, { height: bottomSectionHeight }]}>
                 <TouchableOpacity style={styles.actionButton} onPress={onPressTryOn}>
-                    <Text style={styles.actionButtonText}>Try it on</Text>
+                    <Text style={styles.actionButtonText}>try it on!</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -64,8 +97,8 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: '#FFFFFF',
         borderWidth: 1,
-        borderColor: '#FFAB91',
-        shadowColor: '#BF360C',
+        borderColor: '#E5E5E5',
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
             height: 4,
@@ -80,15 +113,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1, // Full border
-        borderColor: '#FFAB91',
+        borderColor: '#000000',
         borderStyle: 'dashed',
         borderRadius: 12, // Rounded corners
         width: '100%',
+        overflow: 'hidden', // Ensure image stays within bounds
+    },
+    modelImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
     },
     placeholderText: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#BF360C',
+        color: '#000000',
     },
     middleSection: {
         justifyContent: 'center',
@@ -102,13 +141,13 @@ const styles = StyleSheet.create({
         width: 160,
         height: 160,
         borderRadius: 8,
-        backgroundColor: '#FBE9E7',
+        backgroundColor: '#FDFBF7',
         borderWidth: 1,
-        borderColor: '#FFAB91',
+        borderColor: '#000000',
     },
     addSmallCard: {
         backgroundColor: '#FDFBF7',
-        borderColor: '#FFAB91',
+        borderColor: '#000000',
         borderStyle: 'dashed',
         alignItems: 'center',
         justifyContent: 'center',
@@ -117,7 +156,7 @@ const styles = StyleSheet.create({
     addSmallCardText: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#BF360C',
+        color: '#000000',
         textAlign: 'center',
     },
     bottomSection: {
@@ -127,7 +166,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     actionButton: {
-        backgroundColor: '#D84315',
+        backgroundColor: '#000000',
         borderRadius: 12,
         height: 48,
         alignItems: 'center',
@@ -137,5 +176,16 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 4,
+        left: 4,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: 12,
+        padding: 4,
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
     },
 });

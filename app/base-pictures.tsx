@@ -3,6 +3,7 @@ import Colors from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
@@ -56,6 +57,17 @@ export default function TabOneScreen() {
 
   const handleDelete = (id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const handleSelect = async (id: string) => {
+    console.log('Selecting image:', id);
+    const newImages = images.map((img) => ({
+      ...img,
+      selected: img.id === id,
+    }));
+    setImages(newImages);
+    await saveImages(newImages);
+    router.back();
   };
 
   const pickImage = async (useCamera: boolean) => {
@@ -126,11 +138,11 @@ export default function TabOneScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>My Base Pictures</Text>
-          <Text style={styles.subtitle}>Select a picture to build your outfit on.</Text>
+          <Text style={styles.title}>my models</Text>
+          <Text style={styles.subtitle}>select a picture to build your outfit on.</Text>
         </View>
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-          <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color="#BF360C" />
+          <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color="#000000" />
         </TouchableOpacity>
       </View>
 
@@ -138,9 +150,9 @@ export default function TabOneScreen() {
         <Animated.View layout={Layout.springify()} style={{ width: cardWidth }}>
           <TouchableOpacity style={[styles.card, styles.addCard, { width: '100%' }]} onPress={handleAddPress}>
             <View style={styles.addIconContainer}>
-              <MaterialIcons name="add" size={32} color="#BF360C" />
+              <MaterialIcons name="add" size={32} color="#000000" />
             </View>
-            <Text style={styles.addText}>Add New</Text>
+            <Text style={styles.addText}>add new</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -152,7 +164,7 @@ export default function TabOneScreen() {
             layout={Layout.springify()}
             style={[styles.card, image.selected && styles.selectedCard, { width: cardWidth }]}
           >
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { }}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => handleSelect(image.id)}>
               <Image source={{ uri: image.url }} style={styles.image} />
               {image.selected && (
                 <View style={styles.checkIconContainer}>
@@ -193,12 +205,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#BF360C',
+    color: '#000000',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#E64A19',
+    color: '#000000',
   },
   grid: {
     flexDirection: 'row',
@@ -216,7 +228,7 @@ const styles = StyleSheet.create({
   addCard: {
     backgroundColor: 'rgba(253, 251, 247, 0.5)',
     borderWidth: 2,
-    borderColor: '#FFAB91',
+    borderColor: '#000000',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -229,7 +241,7 @@ const styles = StyleSheet.create({
   addText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#BF360C',
+    color: '#000000',
   },
   image: {
     width: '100%',
@@ -238,7 +250,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderWidth: 2,
-    borderColor: '#D84315',
+    borderColor: '#000000',
   },
   checkIconContainer: {
     position: 'absolute',
@@ -247,7 +259,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#D84315',
+    backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
   },

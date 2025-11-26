@@ -34,7 +34,10 @@ export default function TabTwoScreen() {
     try {
       const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
       if (jsonValue != null) {
-        setImages(JSON.parse(jsonValue));
+        const loadedImages = JSON.parse(jsonValue);
+        // Reset selection on load
+        const resetImages = loadedImages.map((img: any) => ({ ...img, selected: false }));
+        setImages(resetImages);
       } else {
         // Initial dummy data
         setImages([]);
@@ -124,9 +127,26 @@ export default function TabTwoScreen() {
   };
 
   const handleSelect = (id: string) => {
+    if (isEditing) return;
     setImages((prev) =>
       prev.map((img) => (img.id === id ? { ...img, selected: !img.selected } : img))
     );
+  };
+
+  const handleConfirm = async () => {
+    try {
+      const selectedItems = images.filter((img) => img.selected).map((img) => ({ id: img.id, url: img.url }));
+      if (selectedItems.length > 0) {
+        const jsonValue = await AsyncStorage.getItem('@active_clothes');
+        const currentActive = jsonValue != null ? JSON.parse(jsonValue) : [];
+        // Avoid duplicates if needed, or just append. Assuming append for now but filtering by ID is safer.
+        const newActive = [...currentActive, ...selectedItems.filter((item: any) => !currentActive.some((ca: any) => ca.id === item.id))];
+        await AsyncStorage.setItem('@active_clothes', JSON.stringify(newActive));
+      }
+      router.back();
+    } catch (e) {
+      console.error('Failed to save active clothes', e);
+    }
   };
 
   const hasSelection = images.some((img) => img.selected);
@@ -135,15 +155,15 @@ export default function TabTwoScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>My Clothes</Text>
-          <Text style={styles.subtitle}>Select photo(s) of clothes to try on</Text>
+          <Text style={styles.title}>my clothes</Text>
+          <Text style={styles.subtitle}>select photo(s) of clothes to try on</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-            <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color="#BF360C" />
+            <MaterialIcons name={isEditing ? "close" : "edit"} size={28} color="#000000" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => hasSelection && router.back()}>
-            <MaterialIcons name="check-circle" size={28} color={hasSelection ? "#10B981" : "#D1D5DB"} />
+          <TouchableOpacity onPress={handleConfirm} disabled={!hasSelection}>
+            <MaterialIcons name="check-circle" size={32} color={hasSelection ? "#10B981" : "#E5E5E5"} />
           </TouchableOpacity>
         </View>
       </View>
@@ -152,9 +172,9 @@ export default function TabTwoScreen() {
         <Animated.View layout={Layout.springify()} style={{ width: cardWidth }}>
           <TouchableOpacity style={[styles.card, styles.addCard, { width: '100%' }]} onPress={handleAddPress}>
             <View style={styles.addIconContainer}>
-              <MaterialIcons name="add" size={32} color="#BF360C" />
+              <MaterialIcons name="add" size={32} color="#000000" />
             </View>
-            <Text style={styles.addText}>Add New</Text>
+            <Text style={styles.addText}>add new</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -207,12 +227,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#BF360C',
+    color: '#000000',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#E64A19',
+    color: '#000000',
   },
   grid: {
     flexDirection: 'row',
@@ -230,7 +250,7 @@ const styles = StyleSheet.create({
   addCard: {
     backgroundColor: 'rgba(253, 251, 247, 0.5)',
     borderWidth: 2,
-    borderColor: '#FFAB91',
+    borderColor: '#000000',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -243,7 +263,7 @@ const styles = StyleSheet.create({
   addText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#BF360C',
+    color: '#000000',
   },
   image: {
     width: '100%',
@@ -252,7 +272,7 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     borderWidth: 2,
-    borderColor: '#D84315',
+    borderColor: '#000000',
   },
   checkIconContainer: {
     position: 'absolute',
@@ -261,7 +281,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#D84315',
+    backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
   },
