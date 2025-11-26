@@ -11,9 +11,9 @@ export default function TabThreeScreen() {
   // Section dimensions
   const topSectionHeight = cardWidth; // Square top section (minus padding handled in render)
   const middleSectionHeight = 200; // Bigger middle section
-  const bottomSectionHeight = 80;
+  const bottomSectionHeight = 64; // Further reduced height
 
-  const cardHeight = topSectionHeight + middleSectionHeight + bottomSectionHeight;
+  const cardHeight = topSectionHeight + middleSectionHeight + bottomSectionHeight - 16; // Adjust for removed padding
   const gap = 24;
 
   // Dummy data for the cards
@@ -41,7 +41,7 @@ export default function TabThreeScreen() {
         {items.map((item) => (
           <View key={item.id} style={[styles.card, { width: cardWidth, height: cardHeight }]}>
             {/* Section 1: Large Square - Add Model Placeholder */}
-            <View style={{ padding: 16 }}>
+            <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
               <TouchableOpacity
                 style={[styles.topSection, { height: topSectionHeight - 32 }]}
                 onPress={() => Alert.alert('Select Model', 'Choose a model for this post')}
@@ -169,7 +169,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomSection: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 0,
     justifyContent: 'center',
   },
   actionButton: {
