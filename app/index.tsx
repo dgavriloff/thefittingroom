@@ -1,7 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-
-import { Text, View } from '@/components/Themed';
+import { router } from 'expo-router';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
 export default function TabThreeScreen() {
   const { width } = useWindowDimensions();
@@ -44,7 +43,7 @@ export default function TabThreeScreen() {
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
               <TouchableOpacity
                 style={[styles.topSection, { height: topSectionHeight - 32 }]}
-                onPress={() => Alert.alert('Select Model', 'Choose a model for this post')}
+                onPress={() => router.push('/base-pictures')}
               >
                 <MaterialIcons name="add" size={40} color="#5C2B34" />
                 <Text style={styles.placeholderText}>Select Model</Text>
@@ -57,7 +56,7 @@ export default function TabThreeScreen() {
                 {/* Add Outfit Placeholder */}
                 <TouchableOpacity
                   style={[styles.smallCard, styles.addSmallCard]}
-                  onPress={() => Alert.alert('Choose Outfit', 'Select an outfit to add')}
+                  onPress={() => router.push('/outfits')}
                 >
                   <MaterialIcons name="add" size={24} color="#5C2B34" />
                   <Text style={styles.addSmallCardText}>Add Clothes</Text>

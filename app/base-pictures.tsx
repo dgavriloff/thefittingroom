@@ -1,11 +1,13 @@
-import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+
+const STORAGE_KEY = '@models';
 
 export default function TabOneScreen() {
   const colorScheme = useColorScheme();
@@ -14,30 +16,65 @@ export default function TabOneScreen() {
   const cardWidth = (width - 32 - 16) / 2;
 
   const [isEditing, setIsEditing] = useState(false);
+  const [images, setImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [images, setImages] = useState([
-    {
-      id: '1',
-      url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGi-H0yawJ1DrRhM9DwMCYuSiawKnx4wjG6XkjGLGPdTI8lb_lnInrCpb6ELiCUCU3QZt9EMe-dwCl2I4mHsPyq_TRqE6cqlSUlZEebwVD76c1RCdEdFVbXl0CJnp6_9rm4Wv_sGUIS_rIUyMBzUbfGeVJrwx3NodQ1XlYiUZMq8VUJIOEm7a-cx5vLNRwyweEVIPxx3Sg3ZKrhwC6vNFItvY9ID4eji1KtDaXXNTz1duhjQZRcsaq-86dp1ftTCRwsQizMldtQwI',
-      selected: true,
-    },
-    {
-      id: '2',
-      url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDbTgQ3Ajl-IBlGzigmw_kyfXWDqNzD41gDIymY0BpDNQOXEeSR7G4ENMbjEgGrN4wzmyE2NWWKzky8965YRzMbEgZl903w_vY5ro4TerExDIk2OkLFgz5kOqmT9KNfMBR6ejh5-ZVMGfBP6UaaQ6ozhWMsXbf-ifQyGMztt7kn6vIHx55EGRmQnx0XH_Lc3OI3s4liMnmp0fug8AvoNuxMXijnDBwVfoy-A95mtLAprWNKBr_CMF9LFFWaB1pAotU3lanJWkykt4I',
-    },
-    {
-      id: '3',
-      url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALxN7vYutWLeAA5axhF43XnBKbX9dEgTTI8WBv8705HjbpAAVWohZcq97_UalGrRIEPsgfa4AcceMwKD06ONA0whCHmcjkNtq1GJKBp6TLNCw3zHmLGBDT0nPA6KFekLkwYGUpheKrD-fTFzo1fnXAcG3vY5z4T90O4bgczHAGCeHz6BNECWI6vLdJgq8ZZikwS_o7maNIxIbBf69H9wk_BZ5aaLS17PX5f8IE2r9pyEVntUBGCWdFPkov6Wr2msOFGy6wUlXvSk8',
-    },
-    {
-      id: '4',
-      url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHUDpS8c_mqme41wSF7cEvq5xQHqQRx4QJrWZ6cxF07zkZR1VxjtmElf4LJx6-PsE-Z0ZkeH0fNONxeahDIllcE5NptSvw3PuS4Dw5ccCJrmtC30_UvyhUW2sAlJIgqag_u7j_ZF_YKDXy2R6Ww8YOXvyDO4T9Zb8HqwXXjTylygyEb9q_m9dPpGv1Lb_kB_46ij0B0Iu2q_2KfGq3ZF0d4Ah9uCuDK2At90U7RgtkCCqyAuEjvh4pCX1-gWlGPweJUg6AyT81yPM',
-    },
-    {
-      id: '5',
-      url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAlDUZeGsCxoA-tE_U6LaiFk1--HpSuXB2qhdLwu8NqKkD3-KgeAzYSJgytGFUv87VwsLv_geKsQLolYuzhFo0XlHaLu-OzqU06WNBrvCDqnBVgMFAL9iDznSz4KdW7fGgHWHrWPU6qtP8D3if16qU2bH6q11AQHVQT5B81dxtkEcre-1K5z2TOjZkbvrqJiGYbBobFAlnpsEXvZFsz73l6zrKSpy4kF1NMXAh59PRPTNsaBMB5LRaRe0AaseILy4Arkz0hHfBqj0s',
-    },
-  ]);
+  useEffect(() => {
+    loadImages();
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      saveImages(images);
+    }
+  }, [images, loading]);
+
+  const loadImages = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      if (jsonValue != null) {
+        setImages(JSON.parse(jsonValue));
+      } else {
+        // Initial dummy data
+        setImages([
+          {
+            id: '1',
+            url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGi-H0yawJ1DrRhM9DwMCYuSiawKnx4wjG6XkjGLGPdTI8lb_lnInrCpb6ELiCUCU3QZt9EMe-dwCl2I4mHsPyq_TRqE6cqlSUlZEebwVD76c1RCdEdFVbXl0CJnp6_9rm4Wv_sGUIS_rIUyMBzUbfGeVJrwx3NodQ1XlYiUZMq8VUJIOEm7a-cx5vLNRwyweEVIPxx3Sg3ZKrhwC6vNFItvY9ID4eji1KtDaXXNTz1duhjQZRcsaq-86dp1ftTCRwsQizMldtQwI',
+            selected: true,
+          },
+          {
+            id: '2',
+            url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDbTgQ3Ajl-IBlGzigmw_kyfXWDqNzD41gDIymY0BpDNQOXEeSR7G4ENMbjEgGrN4wzmyE2NWWKzky8965YRzMbEgZl903w_vY5ro4TerExDIk2OkLFgz5kOqmT9KNfMBR6ejh5-ZVMGfBP6UaaQ6ozhWMsXbf-ifQyGMztt7kn6vIHx55EGRmQnx0XH_Lc3OI3s4liMnmp0fug8AvoNuxMXijnDBwVfoy-A95mtLAprWNKBr_CMF9LFFWaB1pAotU3lanJWkykt4I',
+          },
+          {
+            id: '3',
+            url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALxN7vYutWLeAA5axhF43XnBKbX9dEgTTI8WBv8705HjbpAAVWohZcq97_UalGrRIEPsgfa4AcceMwKD06ONA0whCHmcjkNtq1GJKBp6TLNCw3zHmLGBDT0nPA6KFekLkwYGUpheKrD-fTFzo1fnXAcG3vY5z4T90O4bgczHAGCeHz6BNECWI6vLdJgq8ZZikwS_o7maNIxIbBf69H9wk_BZ5aaLS17PX5f8IE2r9pyEVntUBGCWdFPkov6Wr2msOFGy6wUlXvSk8',
+          },
+          {
+            id: '4',
+            url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHUDpS8c_mqme41wSF7cEvq5xQHqQRx4QJrWZ6cxF07zkZR1VxjtmElf4LJx6-PsE-Z0ZkeH0fNONxeahDIllcE5NptSvw3PuS4Dw5ccCJrmtC30_UvyhUW2sAlJIgqag_u7j_ZF_YKDXy2R6Ww8YOXvyDO4T9Zb8HqwXXjTylygyEb9q_m9dPpGv1Lb_kB_46ij0B0Iu2q_2KfGq3ZF0d4Ah9uCuDK2At90U7RgtkCCqyAuEjvh4pCX1-gWlGPweJUg6AyT81yPM',
+          },
+          {
+            id: '5',
+            url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAlDUZeGsCxoA-tE_U6LaiFk1--HpSuXB2qhdLwu8NqKkD3-KgeAzYSJgytGFUv87VwsLv_geKsQLolYuzhFo0XlHaLu-OzqU06WNBrvCDqnBVgMFAL9iDznSz4KdW7fGgHWHrWPU6qtP8D3if16qU2bH6q11AQHVQT5B81dxtkEcre-1K5z2TOjZkbvrqJiGYbBobFAlnpsEXvZFsz73l6zrKSpy4kF1NMXAh59PRPTNsaBMB5LRaRe0AaseILy4Arkz0hHfBqj0s',
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error('Failed to load images', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveImages = async (value: any[]) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+    } catch (e) {
+      console.error('Failed to save images', e);
+    }
+  };
 
   const handleDelete = (id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
