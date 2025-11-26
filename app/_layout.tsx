@@ -53,7 +53,7 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="base-pictures" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="outfits" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="clothes" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
