@@ -1,3 +1,4 @@
+import ImageModal from '@/components/ImageModal';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -11,6 +12,11 @@ interface FeedCardProps {
     modelImage?: string;
     clothesImages?: string[];
     resultImage?: string;
+    initialTab?: 'input' | 'result';
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onDownload?: () => void;
+    onShare?: () => void;
     onPressModel?: never;
     onPressOutfit?: never;
 }
@@ -24,25 +30,46 @@ export default function FeedCard({
     modelImage,
     clothesImages = [],
     resultImage,
+    initialTab = 'input',
+    onEdit,
+    onDelete,
+    onDownload,
+    onShare,
 }: FeedCardProps) {
-    const [activeTab, setActiveTab] = useState<'input' | 'result'>('input');
+    const [activeTab, setActiveTab] = useState<'input' | 'result'>(initialTab);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleImagePress = (uri: string) => {
+        setSelectedImage(uri);
+        setModalVisible(true);
+    };
 
     return (
         <View style={[styles.card, { width, height }]}>
+            <ImageModal
+                visible={modalVisible}
+                imageUrl={selectedImage}
+                onClose={() => setModalVisible(false)}
+            />
             {/* Section 1: Large Square - Model or Result */}
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
                 <View style={[styles.topSection, { height: topSectionHeight - 32 }, (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0 } : {}]}>
-                    {loading ? (
-                        <ActivityIndicator size="large" color="#000000" />
-                    ) : activeTab === 'input' ? (
+                    {activeTab === 'input' ? (
                         modelImage ? (
-                            <Image source={{ uri: modelImage }} style={styles.modelImage} />
+                            <TouchableOpacity onPress={() => handleImagePress(modelImage)} style={{ width: '100%', height: '100%' }}>
+                                <Image source={{ uri: modelImage }} style={styles.modelImage} />
+                            </TouchableOpacity>
                         ) : (
                             <MaterialIcons name="person" size={40} color="#000000" />
                         )
                     ) : (
-                        resultImage ? (
-                            <Image source={{ uri: resultImage }} style={styles.modelImage} />
+                        loading ? (
+                            <ActivityIndicator size="large" color="#000000" />
+                        ) : resultImage ? (
+                            <TouchableOpacity onPress={() => handleImagePress(resultImage)} style={{ width: '100%', height: '100%' }}>
+                                <Image source={{ uri: resultImage }} style={styles.modelImage} />
+                            </TouchableOpacity>
                         ) : (
                             <Text style={styles.placeholderText}>result pending...</Text>
                         )
@@ -56,7 +83,9 @@ export default function FeedCard({
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.middleScrollContent}>
                         {clothesImages.map((uri, index) => (
                             <View key={index} style={[styles.smallCard, { borderWidth: 0, overflow: 'hidden' }]}>
-                                <Image source={{ uri }} style={styles.modelImage} />
+                                <TouchableOpacity onPress={() => handleImagePress(uri)} style={{ width: '100%', height: '100%' }}>
+                                    <Image source={{ uri }} style={styles.modelImage} />
+                                </TouchableOpacity>
                             </View>
                         ))}
                         {!loading && clothesImages.length === 0 && (
@@ -67,16 +96,16 @@ export default function FeedCard({
                     </ScrollView>
                 ) : (
                     <View style={styles.actionsContainer}>
-                        <TouchableOpacity style={styles.actionIcon}>
+                        <TouchableOpacity style={styles.actionIcon} onPress={onDownload}>
                             <MaterialIcons name="file-download" size={28} color="#000000" />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionIcon}>
+                        <TouchableOpacity style={styles.actionIcon} onPress={onShare}>
                             <MaterialIcons name="share" size={28} color="#000000" />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionIcon}>
+                        <TouchableOpacity style={styles.actionIcon} onPress={onEdit}>
                             <MaterialIcons name="edit" size={28} color="#000000" />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionIcon}>
+                        <TouchableOpacity style={styles.actionIcon} onPress={onDelete}>
                             <MaterialIcons name="delete" size={28} color="#000000" />
                         </TouchableOpacity>
                     </View>

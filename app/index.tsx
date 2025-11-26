@@ -1,11 +1,15 @@
 import EditorCard from '@/components/EditorCard';
 import FeedCard from '@/components/FeedCard';
+import { generateImage } from '@/services/gemini';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as MediaLibrary from 'expo-media-library';
 import { router, useFocusEffect } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
@@ -143,6 +147,7 @@ export default function TabThreeScreen() {
       modelImage: selectedModelImage,
       clothesImages: selectedClothes.map(c => c.url),
       loading: true,
+      initialTab: 'result',
     };
 
     setFeedItems(prev => [newItem, ...prev]);
@@ -172,10 +177,131 @@ export default function TabThreeScreen() {
       scrollViewRef.current?.scrollTo({ y: editorCardHeight + gap, animated: true });
     }, 100);
 
-    // Simulate processing
-    setTimeout(() => {
+    // Call Gemini Service
+    try {
+      const prompt = "Generate a photorealistic image of the person in the first image wearing the clothes from the subsequent images. Maintain the pose and lighting.";
+      const images = [selectedModelImage, ...selectedClothes.map(c => c.url)];
+
+      const result = await generateImage(prompt, images);
+
+
+      setFeedItems(prev => prev.map(item => item.id === newId ? {
+        ...item,
+        loading: false,
+        resultImage: result.imageUrl
+      } : item));
+    } catch (error) {
+      Alert.alert("Error", "Failed to generate image. Please try again.");
       setFeedItems(prev => prev.map(item => item.id === newId ? { ...item, loading: false } : item));
-    }, 20);
+    }
+  };
+
+  const handleEdit = async (item: any) => {
+    if (!item.resultImage) return;
+
+    // 1. Set Result Image as Selected Model
+    setSelectedModelImage(item.resultImage);
+
+    // 2. Set Clothes
+    // Reconstruct clothes objects from URLs. We'll generate temporary IDs.
+    const clothes = item.clothesImages.map((url: string) => ({
+      id: Date.now().toString() + Math.random().toString(), // Unique ID
+      url: url
+    }));
+    setSelectedClothes(clothes);
+
+    // 3. Update Persistence
+    try {
+      // Update active clothes
+      await AsyncStorage.setItem('@active_clothes', JSON.stringify(clothes));
+
+      // We don't necessarily need to save the "result model" to the persistent @models list 
+      // unless we want it to show up in the "My Models" screen. 
+      // For now, let's just keep it in the editor state. 
+      // If we wanted to persist it as a selected model, we'd need to add it to @models.
+      // Let's deselect all persistent models to reflect that we are using a temporary one.
+      const jsonValue = await AsyncStorage.getItem('@models');
+      if (jsonValue != null) {
+        const models = JSON.parse(jsonValue);
+        const newModels = models.map((m: any) => ({ ...m, selected: false }));
+        await AsyncStorage.setItem('@models', JSON.stringify(newModels));
+      }
+
+    } catch (e) {
+      console.error('Failed to update persistence for edit', e);
+    }
+
+    // 4. Scroll to Top
+    scrollToTop();
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Delete Item",
+      "Are you sure you want to delete this item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            setFeedItems(prev => prev.filter(item => item.id !== id));
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDownload = async (item: any) => {
+    if (!item.resultImage) return;
+
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permission required", "Please grant permission to save images.");
+        return;
+      }
+
+      const filename = FileSystem.documentDirectory + `fitting-room-${item.id}.png`;
+      // If it's a data URI, we need to write it to a file first
+      if (item.resultImage.startsWith('data:')) {
+        const base64Code = item.resultImage.split('data:image/png;base64,')[1];
+        await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: FileSystem.EncodingType.Base64 });
+        await MediaLibrary.saveToLibraryAsync(filename);
+        Alert.alert("Saved", "Image saved to your gallery!");
+      } else {
+        // If it's already a file URI or remote URL (though we mostly have data URIs here)
+        // For remote, we'd need downloadAsync. For now assuming data URI from Gemini.
+        await MediaLibrary.saveToLibraryAsync(item.resultImage);
+        Alert.alert("Saved", "Image saved to your gallery!");
+      }
+    } catch (error) {
+      console.error("Download failed:", error);
+      Alert.alert("Error", "Failed to save image.");
+    }
+  };
+
+  const handleShare = async (item: any) => {
+    if (!item.resultImage) return;
+
+    try {
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Error", "Sharing is not available on this device");
+        return;
+      }
+
+      const filename = FileSystem.documentDirectory + `my_outfit.png`;
+      if (item.resultImage.startsWith('data:')) {
+        const base64Code = item.resultImage.split('data:image/png;base64,')[1];
+        await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: FileSystem.EncodingType.Base64 });
+        await Sharing.shareAsync(filename);
+      } else {
+        await Sharing.shareAsync(item.resultImage);
+      }
+    } catch (error) {
+      console.error("Share failed:", error);
+      Alert.alert("Error", "Failed to share image.");
+    }
   };
 
   const handleScroll = (event: any) => {
@@ -191,7 +317,7 @@ export default function TabThreeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>your fitting room</Text>
+          <Text style={styles.title}>the fitting room</Text>
         </View>
         <TouchableOpacity onPress={() => Alert.alert('Settings', 'Settings coming soon!')}>
           <MaterialIcons name="settings" size={24} color="#000000" />
@@ -225,16 +351,27 @@ export default function TabThreeScreen() {
           onRemoveClothes={handleRemoveClothes}
         />
         {feedItems.map((item) => (
-          <FeedCard
+          <Animated.View
             key={item.id}
-            width={cardWidth}
-            height={feedCardHeight}
-            topSectionHeight={topSectionHeight}
-            middleSectionHeight={middleSectionHeight}
-            loading={item.loading}
-            modelImage={item.modelImage}
-            clothesImages={item.clothesImages}
-          />
+            exiting={FadeOut}
+            layout={LinearTransition.springify()}
+          >
+            <FeedCard
+              width={cardWidth}
+              height={feedCardHeight}
+              topSectionHeight={topSectionHeight}
+              middleSectionHeight={middleSectionHeight}
+              loading={item.loading}
+              modelImage={item.modelImage}
+              clothesImages={item.clothesImages}
+              resultImage={item.resultImage}
+              initialTab={item.initialTab}
+              onEdit={() => handleEdit(item)}
+              onDelete={() => handleDelete(item.id)}
+              onDownload={() => handleDownload(item)}
+              onShare={() => handleShare(item)}
+            />
+          </Animated.View>
         ))}
         <View style={{ height: bottomSpacerHeight }} />
       </ScrollView>

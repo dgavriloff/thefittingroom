@@ -1,9 +1,7 @@
 import { GoogleGenAI, Part } from "@google/genai";
-import dotenv from 'dotenv';
+import * as FileSystem from 'expo-file-system/legacy';
 
-dotenv.config();
-
-const apiKey = process.env.GEMINI_API_KEY || '';
+const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
 if (!apiKey) {
     console.warn("Warning: No Gemini API Key found.");
@@ -25,10 +23,21 @@ export interface ImageGenerationResult {
  */
 export const generateImage = async (
     prompt: string,
+    imageUris: string[] = [],
     aspectRatio: AspectRatio = "1:1"
 ): Promise<ImageGenerationResult> => {
     try {
         const parts: Part[] = [{ text: prompt }];
+
+        for (const uri of imageUris) {
+            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+            parts.push({
+                inlineData: {
+                    mimeType: 'image/jpeg', // Assuming JPEG for simplicity, could detect from URI
+                    data: base64
+                }
+            });
+        }
 
         const response = await ai.models.generateContent({
             model: MODEL_NAME,
