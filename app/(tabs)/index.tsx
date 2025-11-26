@@ -13,6 +13,8 @@ export default function TabOneScreen() {
   const { width } = useWindowDimensions();
   const cardWidth = (width - 32 - 16) / 2;
 
+  const [isEditing, setIsEditing] = useState(false);
+
   const [images, setImages] = useState([
     {
       id: '1',
@@ -108,8 +110,13 @@ export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Base Pictures</Text>
-        <Text style={styles.subtitle}>Select a picture to build your outfit on.</Text>
+        <View>
+          <Text style={styles.title}>My Base Pictures</Text>
+          <Text style={styles.subtitle}>Select a picture to build your outfit on.</Text>
+        </View>
+        <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
+          <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color="#5C2B34" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.grid}>
@@ -138,12 +145,16 @@ export default function TabOneScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDelete(image.id)}
-            >
-              <MaterialIcons name="close" size={16} color="#FFF" />
-            </TouchableOpacity>
+            {isEditing && (
+              <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.deleteButton}>
+                <TouchableOpacity
+                  style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                  onPress={() => handleDelete(image.id)}
+                >
+                  <MaterialIcons name="close" size={16} color="#FFF" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
           </Animated.View>
         ))}
       </ScrollView>
@@ -159,6 +170,8 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
