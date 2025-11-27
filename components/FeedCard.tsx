@@ -57,7 +57,7 @@ export default function FeedCard({
                 <View style={[styles.topSection, { height: topSectionHeight - 32 }, (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0 } : {}]}>
                     {activeTab === 'input' ? (
                         modelImage ? (
-                            <TouchableOpacity onPress={() => handleImagePress(modelImage)} style={{ width: '100%', height: '100%' }}>
+                            <TouchableOpacity onPress={() => handleImagePress(modelImage)} style={{ width: '100%', height: '100%' }} activeOpacity={1}>
                                 <Image source={{ uri: modelImage }} style={styles.modelImage} />
                             </TouchableOpacity>
                         ) : (
@@ -67,7 +67,7 @@ export default function FeedCard({
                         loading ? (
                             <ActivityIndicator size="large" color="#000000" />
                         ) : resultImage ? (
-                            <TouchableOpacity onPress={() => handleImagePress(resultImage)} style={{ width: '100%', height: '100%' }}>
+                            <TouchableOpacity onPress={() => handleImagePress(resultImage)} style={{ width: '100%', height: '100%' }} activeOpacity={1}>
                                 <Image source={{ uri: resultImage }} style={styles.modelImage} />
                             </TouchableOpacity>
                         ) : (
@@ -83,7 +83,7 @@ export default function FeedCard({
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.middleScrollContent}>
                         {clothesImages.map((uri, index) => (
                             <View key={index} style={[styles.smallCard, { borderWidth: 0, overflow: 'hidden' }]}>
-                                <TouchableOpacity onPress={() => handleImagePress(uri)} style={{ width: '100%', height: '100%' }}>
+                                <TouchableOpacity onPress={() => handleImagePress(uri)} style={{ width: '100%', height: '100%' }} activeOpacity={1}>
                                     <Image source={{ uri }} style={styles.modelImage} />
                                 </TouchableOpacity>
                             </View>

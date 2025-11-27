@@ -37,6 +37,7 @@ export default function EditorCard({
                 <TouchableOpacity
                     style={[styles.topSection, { height: topSectionHeight - 32 }, selectedModelImage ? { borderWidth: 0 } : {}]}
                     onPress={onPressModel}
+                    activeOpacity={selectedModelImage ? 1 : 0.2}
                 >
                     {selectedModelImage ? (
                         <View style={{ width: '100%', height: '100%' }}>
