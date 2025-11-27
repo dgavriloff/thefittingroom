@@ -8,8 +8,8 @@ import * as MediaLibrary from 'expo-media-library';
 import { router, useFocusEffect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { Alert, Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import Animated, { FadeOut, interpolate, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
@@ -21,6 +21,29 @@ export default function TabThreeScreen() {
   const [feedItems, setFeedItems] = useState<any[]>([]);
   const [feedLoaded, setFeedLoaded] = useState(false);
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  const [isProMode, setIsProMode] = useState(false);
+
+  // Sidebar State
+  const sidebarOpen = useSharedValue(0);
+  const SIDEBAR_WIDTH = 250;
+
+  const handleToggleSidebar = () => {
+    sidebarOpen.value = withTiming(sidebarOpen.value === 0 ? 1 : 0, { duration: 300 });
+  };
+
+  const mainContentStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(sidebarOpen.value, [0, 1], [0, -SIDEBAR_WIDTH]);
+    return {
+      transform: [{ translateX }],
+    };
+  });
+
+  const sidebarStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(sidebarOpen.value, [0, 1], [width, width - SIDEBAR_WIDTH]);
+    return {
+      transform: [{ translateX }],
+    };
+  });
 
   useEffect(() => {
     const loadFeedItems = async () => {
@@ -39,6 +62,19 @@ export default function TabThreeScreen() {
       }
     };
     loadFeedItems();
+
+    // Load Pro Mode setting
+    const loadProMode = async () => {
+      try {
+        const value = await AsyncStorage.getItem('@pro_mode');
+        if (value !== null) {
+          setIsProMode(JSON.parse(value));
+        }
+      } catch (e) {
+        console.error('Failed to load pro mode', e);
+      }
+    };
+    loadProMode();
   }, []);
 
   useEffect(() => {
@@ -210,7 +246,8 @@ export default function TabThreeScreen() {
         }
       }
 
-      const result = await generateImage(prompt, images, aspectRatio);
+      const modelName = isProMode ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image';
+      const result = await generateImage(prompt, images, aspectRatio, modelName);
 
 
       setFeedItems(prev => prev.map(item => item.id === newId ? {
@@ -363,74 +400,110 @@ export default function TabThreeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>the fitting room</Text>
-        </View>
-        <TouchableOpacity onPress={() => Alert.alert('Settings', 'Settings coming soon!')}>
-          <MaterialIcons name="settings" size={24} color="#000000" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={styles.grid}
-        showsVerticalScrollIndicator={false}
-        decelerationRate="fast"
-        snapToOffsets={snapOffsets}
-        snapToAlignment="start"
-        snapToEnd={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        <EditorCard
-          key="editor"
-          width={cardWidth}
-          height={editorCardHeight}
-          topSectionHeight={topSectionHeight}
-          middleSectionHeight={middleSectionHeight}
-          bottomSectionHeight={bottomSectionHeight}
-          onPressModel={() => router.push('/base-pictures')}
-          onPressOutfit={() => router.push('/clothes')}
-          onPressTryOn={handleTryOn}
-          selectedModelImage={selectedModelImage}
-          selectedClothes={selectedClothes}
-          onRemoveModel={handleRemoveModel}
-          onRemoveClothes={handleRemoveClothes}
-        />
-        {feedItems.map((item) => (
-          <Animated.View
-            key={item.id}
-            exiting={FadeOut}
-            layout={LinearTransition.springify()}
-          >
-            <FeedCard
-              width={cardWidth}
-              height={feedCardHeight}
-              topSectionHeight={topSectionHeight}
-              middleSectionHeight={middleSectionHeight}
-              loading={item.loading}
-              modelImage={item.modelImage}
-              clothesImages={item.clothesImages}
-              resultImage={item.resultImage}
-              initialTab={item.initialTab}
-              onEdit={() => handleEdit(item)}
-              onDelete={() => handleDelete(item.id)}
-              onDownload={() => handleDownload(item)}
-              onShare={() => handleShare(item)}
-            />
-          </Animated.View>
-        ))}
-        <View style={{ height: bottomSpacerHeight }} />
-      </ScrollView>
-
-      {showScrollTopButton && (
-        <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.floatingButtonContainer}>
-          <TouchableOpacity style={styles.floatingButton} onPress={scrollToTop}>
-            <MaterialIcons name="add" size={40} color="#FFFFFF" />
+      <Animated.View style={[{ flex: 1, paddingTop: 50 }, mainContentStyle]}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>the fitting room</Text>
+          </View>
+          <TouchableOpacity onPress={handleToggleSidebar}>
+            <MaterialIcons name="menu" size={24} color="#000000" />
           </TouchableOpacity>
-        </Animated.View>
-      )}
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.grid}
+          showsVerticalScrollIndicator={false}
+          decelerationRate="fast"
+          snapToOffsets={snapOffsets}
+          snapToAlignment="start"
+          snapToEnd={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          <EditorCard
+            key="editor"
+            width={cardWidth}
+            height={editorCardHeight}
+            topSectionHeight={topSectionHeight}
+            middleSectionHeight={middleSectionHeight}
+            bottomSectionHeight={bottomSectionHeight}
+            onPressModel={() => router.push('/base-pictures')}
+            onPressOutfit={() => router.push('/clothes')}
+            onPressTryOn={handleTryOn}
+            selectedModelImage={selectedModelImage}
+            selectedClothes={selectedClothes}
+            onRemoveModel={handleRemoveModel}
+            onRemoveClothes={handleRemoveClothes}
+          />
+          {feedItems.map((item) => (
+            <Animated.View
+              key={item.id}
+              exiting={FadeOut}
+              layout={LinearTransition.springify()}
+            >
+              <FeedCard
+                width={cardWidth}
+                height={feedCardHeight}
+                topSectionHeight={topSectionHeight}
+                middleSectionHeight={middleSectionHeight}
+                loading={item.loading}
+                modelImage={item.modelImage}
+                clothesImages={item.clothesImages}
+                resultImage={item.resultImage}
+                initialTab={item.initialTab}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => handleDelete(item.id)}
+                onDownload={() => handleDownload(item)}
+                onShare={() => handleShare(item)}
+              />
+            </Animated.View>
+          ))}
+          <View style={{ height: bottomSpacerHeight }} />
+        </ScrollView>
+
+      </Animated.View>
+
+      <Animated.View style={[styles.sidebar, { height }, sidebarStyle]}>
+        <View style={styles.sidebarHeader}>
+          <Text style={styles.sidebarTitle}>Settings</Text>
+          <TouchableOpacity onPress={handleToggleSidebar}>
+            <MaterialIcons name="close" size={24} color="#000000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.sidebarContent}>
+          <View style={styles.sidebarItem}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+              <MaterialIcons name="flash-on" size={24} color="#000000" />
+              <Text style={styles.sidebarItemText}>Pro Mode</Text>
+            </View>
+            <Switch
+              value={isProMode}
+              onValueChange={async (value) => {
+                setIsProMode(value);
+                try {
+                  await AsyncStorage.setItem('@pro_mode', JSON.stringify(value));
+                } catch (e) {
+                  console.error('Failed to save pro mode', e);
+                }
+              }}
+              trackColor={{ false: '#767577', true: '#000000' }}
+              thumbColor={isProMode ? '#FFFFFF' : '#f4f3f4'}
+            />
+          </View>
+
+          <View style={{ flex: 1 }} />
+
+          <TouchableOpacity style={styles.sidebarItem} onPress={() => Alert.alert('Info', 'Version 1.0.0')}>
+            <MaterialIcons name="info-outline" size={24} color="#000000" />
+            <Text style={styles.sidebarItemText}>About</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.sidebarItem} onPress={() => Alert.alert('Help', 'Contact support')}>
+            <MaterialIcons name="help-outline" size={24} color="#000000" />
+            <Text style={styles.sidebarItemText}>Help & Support</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -439,8 +512,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FDFBF7',
-    paddingTop: 50,
+    paddingTop: 0, // Moved to mainContent
   },
+  sidebar: {
+    position: 'absolute',
+    top: 0,
+    left: 0, // Will be translated
+    width: 250,
+    backgroundColor: '#FDFBF7',
+    borderLeftWidth: 1,
+    borderLeftColor: '#E5E5E5',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    zIndex: 100,
+  },
+  sidebarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  sidebarTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  sidebarContent: {
+    flex: 1,
+    gap: 20,
+    paddingBottom: 40,
+  },
+  sidebarItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  sidebarItemText: {
+    fontSize: 18,
+    color: '#000000',
+  },
+
   header: {
     padding: 16,
     flexDirection: 'row',
