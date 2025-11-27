@@ -250,9 +250,29 @@ export default function TabThreeScreen() {
       // Let's deselect all persistent models to reflect that we are using a temporary one.
       const jsonValue = await AsyncStorage.getItem('@models');
       if (jsonValue != null) {
-        const models = JSON.parse(jsonValue);
-        const newModels = models.map((m: any) => ({ ...m, selected: false }));
-        await AsyncStorage.setItem('@models', JSON.stringify(newModels));
+        let models = JSON.parse(jsonValue);
+
+        // Check if model exists
+        const existingIndex = models.findIndex((m: any) => m.url === item.modelImage);
+
+        if (existingIndex >= 0) {
+          // Select existing
+          models = models.map((m: any, index: number) => ({
+            ...m,
+            selected: index === existingIndex
+          }));
+        } else {
+          // Add new and select
+          const newModel = {
+            id: Date.now().toString(),
+            url: item.modelImage,
+            selected: true
+          };
+          models = models.map((m: any) => ({ ...m, selected: false }));
+          models.unshift(newModel);
+        }
+
+        await AsyncStorage.setItem('@models', JSON.stringify(models));
       }
 
     } catch (e) {
