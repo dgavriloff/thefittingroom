@@ -54,11 +54,7 @@ export default function FeedCard({
             />
             {/* Section 1: Large Square - Model or Result */}
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
-                <View style={[
-                    styles.topSection,
-                    { height: topSectionHeight - 32 },
-                    (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0, backgroundColor: '#000000' } : {}
-                ]}>
+                <View style={[styles.topSection, { height: topSectionHeight - 32 }, (activeTab === 'input' ? modelImage : resultImage) ? { borderWidth: 0 } : {}]}>
                     {activeTab === 'input' ? (
                         modelImage ? (
                             <TouchableOpacity onPress={() => handleImagePress(modelImage)} style={{ width: '100%', height: '100%' }}>
@@ -179,7 +175,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     topSection: {
-        backgroundColor: '#FDFBF7',
+        backgroundColor: '#FFFFFF',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1, // Full border
@@ -222,12 +218,12 @@ const styles = StyleSheet.create({
         width: 160,
         height: 160,
         borderRadius: 8,
-        backgroundColor: '#FDFBF7',
+        backgroundColor: '#FFFFFF',
         borderWidth: 1,
         borderColor: '#000000',
     },
     addSmallCard: {
-        backgroundColor: '#FDFBF7',
+        backgroundColor: '#FFFFFF',
         borderColor: '#000000',
         borderStyle: 'dashed',
         alignItems: 'center',
@@ -241,7 +237,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     placeholderCard: {
-        backgroundColor: '#FDFBF7',
+        backgroundColor: '#FFFFFF',
         borderColor: '#000000',
         borderStyle: 'dashed',
         alignItems: 'center',

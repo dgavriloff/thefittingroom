@@ -9,7 +9,7 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey });
 
-const MODEL_NAME = 'gemini-2.5-flash-image';
+const MODEL_NAME = 'gemini-3-pro-image-preview';
 
 export type AspectRatio = "1:1" | "16:9" | "4:3" | "3:4" | "9:16";
 
@@ -24,7 +24,7 @@ export interface ImageGenerationResult {
 export const generateImage = async (
     prompt: string,
     imageUris: string[] = [],
-    aspectRatio: AspectRatio = "9:16"
+    aspectRatio: AspectRatio = "1:1"
 ): Promise<ImageGenerationResult> => {
     try {
         const parts: Part[] = [{ text: prompt }];

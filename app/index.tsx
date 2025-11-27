@@ -1,6 +1,6 @@
 import EditorCard from '@/components/EditorCard';
 import FeedCard from '@/components/FeedCard';
-import { generateImage } from '@/services/gemini';
+import { AspectRatio, generateImage } from '@/services/gemini';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -8,7 +8,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { router, useFocusEffect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 export default function TabThreeScreen() {
@@ -179,17 +179,38 @@ export default function TabThreeScreen() {
 
     // Call Gemini Service
     try {
-      const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and a 'garment image'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image'.
+      const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and 'garment image(s)'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image(s)'.
 
 **Crucial Rules:**
 1.  **Complete Garment Replacement:** You MUST completely REMOVE and REPLACE the clothing item(s) worn by the person in the 'model image' with the new garment. No part of the original clothing (e.g., collars, sleeves, patterns) should be visible in the final image.
 2.  **Preserve the Model:** The person's face, hair, body shape, and pose from the 'model image' MUST remain unchanged.
 3.  **Preserve the Background:** The entire background from the 'model image' MUST be preserved perfectly.
 4.  **Apply the Garment:** Realistically fit the new garment onto the person. It should adapt to their pose with natural folds, shadows, and lighting consistent with the original scene.
-5.  **Output:** Return ONLY the final, edited image. Do not include any text.`
+5.  **Output:** Return ONLY the final, edited image with the full body, shoes to head, shown.`
       const images = [selectedModelImage, ...selectedClothes.map(c => c.url)];
 
-      const result = await generateImage(prompt, images);
+      // Calculate Aspect Ratio
+      let aspectRatio: AspectRatio = "1:1";
+      if (selectedModelImage) {
+        try {
+          const { width, height } = await new Promise<{ width: number, height: number }>((resolve, reject) => {
+            Image.getSize(selectedModelImage, (width, height) => resolve({ width, height }), reject);
+          });
+          const ratio = width / height;
+
+          if (ratio > 1.5) aspectRatio = "16:9";
+          else if (ratio > 1.15) aspectRatio = "4:3";
+          else if (ratio > 0.85) aspectRatio = "1:1";
+          else if (ratio > 0.65) aspectRatio = "3:4";
+          else aspectRatio = "9:16";
+
+          console.log(`Detected ratio: ${ratio}, using: ${aspectRatio}`);
+        } catch (e) {
+          console.warn("Failed to get image size", e);
+        }
+      }
+
+      const result = await generateImage(prompt, images, aspectRatio);
 
 
       setFeedItems(prev => prev.map(item => item.id === newId ? {
