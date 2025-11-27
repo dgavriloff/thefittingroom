@@ -24,7 +24,7 @@ export interface ImageGenerationResult {
 export const generateImage = async (
     prompt: string,
     imageUris: string[] = [],
-    aspectRatio: AspectRatio = "1:1"
+    aspectRatio: AspectRatio = "9:16"
 ): Promise<ImageGenerationResult> => {
     try {
         const parts: Part[] = [{ text: prompt }];

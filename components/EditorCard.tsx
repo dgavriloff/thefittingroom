@@ -35,7 +35,11 @@ export default function EditorCard({
             {/* Section 1: Large Square - Add Model Placeholder */}
             <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 0 }}>
                 <TouchableOpacity
-                    style={[styles.topSection, { height: topSectionHeight - 32 }, selectedModelImage ? { borderWidth: 0 } : {}]}
+                    style={[
+                        styles.topSection,
+                        { height: topSectionHeight - 32 },
+                        selectedModelImage ? { borderWidth: 0, backgroundColor: '#000000' } : {}
+                    ]}
                     onPress={onPressModel}
                 >
                     {selectedModelImage ? (
@@ -62,7 +66,7 @@ export default function EditorCard({
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.middleScrollContent}>
                     {selectedClothes.map((item, index) => (
                         <View key={item.id} style={[styles.smallCard, { borderWidth: 0, overflow: 'hidden' }]}>
-                            <Image source={{ uri: item.url }} style={styles.modelImage} />
+                            <Image source={{ uri: item.url }} style={styles.clothesImage} />
                             <TouchableOpacity
                                 style={styles.removeButton}
                                 onPress={() => onRemoveClothes(item.id)}
@@ -120,6 +124,11 @@ const styles = StyleSheet.create({
         overflow: 'hidden', // Ensure image stays within bounds
     },
     modelImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
+    },
+    clothesImage: {
         width: '100%',
         height: '100%',
         resizeMode: 'cover',

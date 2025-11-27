@@ -179,7 +179,14 @@ export default function TabThreeScreen() {
 
     // Call Gemini Service
     try {
-      const prompt = "Generate a photorealistic image of the person in the first image wearing the clothes from the subsequent images. Maintain the pose and lighting.";
+      const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and a 'garment image'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image'.
+
+**Crucial Rules:**
+1.  **Complete Garment Replacement:** You MUST completely REMOVE and REPLACE the clothing item(s) worn by the person in the 'model image' with the new garment. No part of the original clothing (e.g., collars, sleeves, patterns) should be visible in the final image.
+2.  **Preserve the Model:** The person's face, hair, body shape, and pose from the 'model image' MUST remain unchanged.
+3.  **Preserve the Background:** The entire background from the 'model image' MUST be preserved perfectly.
+4.  **Apply the Garment:** Realistically fit the new garment onto the person. It should adapt to their pose with natural folds, shadows, and lighting consistent with the original scene.
+5.  **Output:** Return ONLY the final, edited image. Do not include any text.`
       const images = [selectedModelImage, ...selectedClothes.map(c => c.url)];
 
       const result = await generateImage(prompt, images);
