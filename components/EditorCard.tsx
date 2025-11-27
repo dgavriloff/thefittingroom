@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1, // Full border
+        borderWidth: 2, // Full border
         borderColor: '#000000',
         borderStyle: 'dashed',
         borderRadius: 12, // Rounded corners
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     addSmallCard: {
         backgroundColor: '#FFFFFF',
         borderColor: '#000000',
+        borderWidth: 2,
         borderStyle: 'dashed',
         alignItems: 'center',
         justifyContent: 'center',

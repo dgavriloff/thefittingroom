@@ -139,7 +139,7 @@ export default function TabOneScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>my models</Text>
-          <Text style={styles.subtitle}>select a picture to build your outfit on.</Text>
+          <Text style={styles.subtitle}>select a picture to build your outfit on</Text>
         </View>
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color="#000000" />
