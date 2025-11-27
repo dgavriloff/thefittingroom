@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FDFBF7',
     borderLeftWidth: 1,
     borderLeftColor: '#E5E5E5',
-    paddingTop: 50,
+    paddingTop: 66,
     paddingHorizontal: 20,
     zIndex: 100,
   },
