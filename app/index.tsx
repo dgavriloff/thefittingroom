@@ -9,7 +9,7 @@ import { router, useFocusEffect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeOut, interpolate, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, interpolate, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
@@ -184,6 +184,7 @@ export default function TabThreeScreen() {
       clothesImages: selectedClothes.map(c => c.url),
       loading: true,
       initialTab: 'result',
+      estimatedDuration: isProMode ? 45000 : 15000,
     };
 
     setFeedItems(prev => [newItem, ...prev]);
@@ -255,9 +256,12 @@ export default function TabThreeScreen() {
         loading: false,
         resultImage: result.imageUrl
       } : item));
-    } catch (error) {
-      Alert.alert("Error", "Failed to generate image. Please try again.");
-      setFeedItems(prev => prev.map(item => item.id === newId ? { ...item, loading: false } : item));
+
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to generate image. Please try again.";
+      Alert.alert("Generation Failed", errorMessage);
+      // Remove the pending item if generation failed
+      setFeedItems(prev => prev.filter(item => item.id !== newId));
     }
   };
 
@@ -398,6 +402,29 @@ export default function TabThreeScreen() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
+  const handleReset = () => {
+    Alert.alert(
+      "Reset Data",
+      "Are you sure you want to clear all data? This will reset your models and clothes to defaults. You will need to restart the app.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+              Alert.alert("Data Reset", "Please restart the app to reload default data.");
+            } catch (e) {
+              console.error("Failed to clear data", e);
+              Alert.alert("Error", "Failed to reset data.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Animated.View style={[{ flex: 1, paddingTop: 50 }, mainContentStyle]}>
@@ -452,6 +479,7 @@ export default function TabThreeScreen() {
                 clothesImages={item.clothesImages}
                 resultImage={item.resultImage}
                 initialTab={item.initialTab}
+                estimatedDuration={item.estimatedDuration}
                 onEdit={() => handleEdit(item)}
                 onDelete={() => handleDelete(item.id)}
                 onDownload={() => handleDownload(item)}
@@ -461,6 +489,14 @@ export default function TabThreeScreen() {
           ))}
           <View style={{ height: bottomSpacerHeight }} />
         </ScrollView>
+
+        {showScrollTopButton && (
+          <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.floatingButtonContainer}>
+            <TouchableOpacity style={styles.floatingButton} onPress={scrollToTop}>
+              <MaterialIcons name="add" size={40} color="#FFFFFF" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
       </Animated.View>
 
@@ -494,13 +530,18 @@ export default function TabThreeScreen() {
 
           <View style={{ flex: 1 }} />
 
-          <TouchableOpacity style={styles.sidebarItem} onPress={() => Alert.alert('Info', 'Version 1.0.0')}>
+          <TouchableOpacity style={styles.sidebarItem} onPress={() => router.push('/about')}>
             <MaterialIcons name="info-outline" size={24} color="#000000" />
             <Text style={styles.sidebarItemText}>About</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sidebarItem} onPress={() => Alert.alert('Help', 'Contact support')}>
+          <TouchableOpacity style={styles.sidebarItem} onPress={() => router.push('/help')}>
             <MaterialIcons name="help-outline" size={24} color="#000000" />
             <Text style={styles.sidebarItemText}>Help & Support</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.sidebarItem} onPress={handleReset}>
+            <MaterialIcons name="delete-outline" size={24} color="#EF4444" />
+            <Text style={[styles.sidebarItemText, { color: '#EF4444' }]}>Reset Data</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -598,3 +639,5 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
   },
 });
+
+

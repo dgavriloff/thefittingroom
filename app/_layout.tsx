@@ -55,6 +55,8 @@ function RootLayoutNav() {
         <Stack.Screen name="base-pictures" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="clothes" options={{ presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="about" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="help" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

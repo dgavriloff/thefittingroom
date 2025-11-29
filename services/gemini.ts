@@ -21,6 +21,26 @@ export interface ImageGenerationResult {
 /**
  * Generates an image using Gemini 2.5 Flash Image.
  */
+/**
+ * Ensures that a URI is local and readable by FileSystem.
+ * If it's a remote URI (http/https), it downloads it to the cache.
+ */
+const ensureLocalUri = async (uri: string): Promise<string> => {
+    if (uri.startsWith('http://') || uri.startsWith('https://')) {
+        try {
+            const filename = `cached_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+            const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+            const { uri: localUri } = await FileSystem.downloadAsync(uri, fileUri);
+            return localUri;
+        } catch (e) {
+            console.warn("Failed to download remote image:", uri, e);
+            // Fallback to original URI, though it will likely fail if it's http
+            return uri;
+        }
+    }
+    return uri;
+};
+
 export const generateImage = async (
     prompt: string,
     imageUris: string[] = [],
@@ -31,7 +51,8 @@ export const generateImage = async (
         const parts: Part[] = [{ text: prompt }];
 
         for (const uri of imageUris) {
-            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+            const localUri = await ensureLocalUri(uri);
+            const base64 = await FileSystem.readAsStringAsync(localUri, { encoding: 'base64' });
             parts.push({
                 inlineData: {
                     mimeType: 'image/jpeg', // Assuming JPEG for simplicity, could detect from URI
@@ -54,7 +75,23 @@ export const generateImage = async (
         let resultText: string | null = null;
 
         if (response.candidates && response.candidates.length > 0) {
-            const content = response.candidates[0].content;
+            const candidate = response.candidates[0];
+
+            // Check for safety blocking
+            const reason = candidate.finishReason;
+            if (reason === 'SAFETY' || reason === 'IMAGE_SAFETY' || reason === 'BLOCKLIST' || reason === 'PROHIBITED_CONTENT' || reason === 'IMAGE_PROHIBITED_CONTENT') {
+                throw new Error("Image rejected due to safety guidelines. Please contact support if you believe this is a mistake.");
+            }
+
+            if (reason === 'RECITATION') {
+                throw new Error("Image rejected due to copyright/recitation guidelines.");
+            }
+
+            if (reason === 'LANGUAGE') {
+                throw new Error("The request was in an unsupported language.");
+            }
+
+            const content = candidate.content;
             if (content && content.parts) {
                 for (const part of content.parts) {
                     if (part.inlineData) {
@@ -68,7 +105,8 @@ export const generateImage = async (
         }
 
         if (!resultImageUrl && !resultText) {
-            throw new Error("No content generated from the model.");
+            // Fallback for other finish reasons or empty response
+            throw new Error("Generation failed. The model returned no content.");
         }
 
         return {
@@ -77,7 +115,6 @@ export const generateImage = async (
         };
 
     } catch (error) {
-        console.error("Error generating image:", error);
         throw error;
     }
 };

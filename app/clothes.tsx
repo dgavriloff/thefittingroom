@@ -2,6 +2,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -39,8 +40,59 @@ export default function TabTwoScreen() {
         const resetImages = loadedImages.map((img: any) => ({ ...img, selected: false }));
         setImages(resetImages);
       } else {
-        // Initial dummy data
-        setImages([]);
+        // Initial dummy data - Copy to FileSystem
+        const seedDefaults = async () => {
+          const defaults = [
+            {
+              id: 'default-pink-slacks',
+              asset: require('@/assets/images/default-clothes/pink-slacks.jpg'),
+              filename: 'default-pink-slacks.jpg'
+            },
+            {
+              id: 'default-tweed-jacket',
+              asset: require('@/assets/images/default-clothes/tweed-jacket.jpg'),
+              filename: 'default-tweed-jacket.jpg'
+            },
+            {
+              id: 'default-image',
+              asset: require('@/assets/images/default-clothes/image.png'),
+              filename: 'default-image.png'
+            },
+            {
+              id: 'default-screenshot',
+              asset: require('@/assets/images/default-clothes/Screenshot 2025-11-26 142716.png'),
+              filename: 'default-screenshot.png'
+            },
+          ];
+
+          const newImages = [];
+
+          for (const item of defaults) {
+            try {
+              const assetUri = Image.resolveAssetSource(item.asset).uri;
+              const targetUri = `${FileSystem.documentDirectory}${item.filename}`;
+
+              // Check if file exists, if not copy it
+              const fileInfo = await FileSystem.getInfoAsync(targetUri);
+              if (!fileInfo.exists) {
+                await FileSystem.downloadAsync(assetUri, targetUri);
+              }
+
+              newImages.push({
+                id: item.id,
+                url: targetUri,
+                selected: false,
+              });
+            } catch (e) {
+              console.error(`Failed to seed default ${item.id}`, e);
+            }
+          }
+
+          setImages(newImages);
+          saveImages(newImages);
+        };
+
+        await seedDefaults();
       }
     } catch (e) {
       console.error('Failed to load images', e);

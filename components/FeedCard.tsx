@@ -1,7 +1,7 @@
 import ImageModal from '@/components/ImageModal';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface FeedCardProps {
     width: number;
@@ -19,6 +19,7 @@ interface FeedCardProps {
     onShare?: () => void;
     onPressModel?: never;
     onPressOutfit?: never;
+    estimatedDuration?: number;
 }
 
 export default function FeedCard({
@@ -31,6 +32,7 @@ export default function FeedCard({
     clothesImages = [],
     resultImage,
     initialTab = 'input',
+    estimatedDuration = 10000, // Default 10s
     onEdit,
     onDelete,
     onDownload,
@@ -39,6 +41,38 @@ export default function FeedCard({
     const [activeTab, setActiveTab] = useState<'input' | 'result'>(initialTab);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [progress, setProgress] = useState(0);
+    const [loadingMessage, setLoadingMessage] = useState('visualizing...');
+
+    useEffect(() => {
+        if (loading) {
+            setProgress(0);
+
+            // Randomize loading message
+            const messages = ['visualizing...', 'fitting clothes...', 'trying on clothes...'];
+            setLoadingMessage(messages[Math.floor(Math.random() * messages.length)]);
+
+            const interval = setInterval(() => {
+                setProgress((prev) => {
+                    if (prev >= 95) return 95; // Cap at 95% until done
+
+                    // Non-linear progress:
+                    // Base increment for linear progress
+                    const baseIncrement = 100 / (estimatedDuration / 100);
+
+                    // Random factor between 0.1 and 3.0
+                    // This makes it sometimes slow (0.1x) and sometimes fast (3x)
+                    const randomFactor = Math.random() * 2.9 + 0.1;
+
+                    return prev + baseIncrement * randomFactor;
+                });
+            }, 100);
+
+            return () => clearInterval(interval);
+        } else {
+            setProgress(100);
+        }
+    }, [loading, estimatedDuration]);
 
     const handleImagePress = (uri: string) => {
         setSelectedImage(uri);
@@ -65,7 +99,12 @@ export default function FeedCard({
                         )
                     ) : (
                         loading ? (
-                            <ActivityIndicator size="large" color="#000000" />
+                            <View style={{ alignItems: 'center', gap: 10, width: '80%' }}>
+                                <Text style={styles.progressText}>{loadingMessage} {Math.round(progress)}%</Text>
+                                <View style={styles.progressBarContainer}>
+                                    <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+                                </View>
+                            </View>
                         ) : resultImage ? (
                             <TouchableOpacity onPress={() => handleImagePress(resultImage)} style={{ width: '100%', height: '100%' }} activeOpacity={1}>
                                 <Image source={{ uri: resultImage }} style={styles.modelImage} />
@@ -207,12 +246,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 32,
+        gap: 16,
         width: '100%',
         height: '100%',
     },
     actionIcon: {
-        padding: 8,
+        padding: 12,
+        backgroundColor: '#FDFBF7',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
     },
     smallCard: {
         width: 160,
@@ -242,5 +285,21 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    progressBarContainer: {
+        width: '100%',
+        height: 6,
+        backgroundColor: '#E5E5E5',
+        borderRadius: 3,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: '#000000',
+    },
+    progressText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#000000',
     },
 });
