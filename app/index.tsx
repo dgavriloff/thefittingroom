@@ -539,10 +539,12 @@ export default function TabThreeScreen() {
             <Text style={styles.sidebarItemText}>Help & Support</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sidebarItem} onPress={handleReset}>
-            <MaterialIcons name="delete-outline" size={24} color="#EF4444" />
-            <Text style={[styles.sidebarItemText, { color: '#EF4444' }]}>Reset Data</Text>
-          </TouchableOpacity>
+          {__DEV__ && (
+            <TouchableOpacity style={styles.sidebarItem} onPress={handleReset}>
+              <MaterialIcons name="delete-outline" size={24} color="#EF4444" />
+              <Text style={[styles.sidebarItemText, { color: '#EF4444' }]}>Reset Data</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </Animated.View>
     </View>

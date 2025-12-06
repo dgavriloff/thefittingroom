@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "fitting-room",
+    "name": "the fitting room",
     "slug": "fitting-room",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fittingroom",
+    "scheme": "thefittingroom",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {

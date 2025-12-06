@@ -125,8 +125,6 @@ export default function TabTwoScreen() {
         }
         result = await ImagePicker.launchCameraAsync({
           mediaTypes: 'images',
-          allowsEditing: true,
-          aspect: [3, 4],
           quality: 1,
         });
       } else {
