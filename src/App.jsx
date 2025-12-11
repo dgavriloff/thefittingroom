@@ -246,23 +246,38 @@ const Footer = () => {
   );
 };
 
-const Home = () => (
-  <>
-    <Navbar />
-    <Hero />
-    <Features />
+const Home = () => {
+  useEffect(() => {
+    const images = [
+      "/demo-1.png",
+      "/demo-2.png",
+      "/demo-3.png"
+    ];
 
-    <section className="bg-black text-white py-32 text-center rounded-t-[60px] -mt-10 relative z-20">
-      <div className="container mx-auto px-6">
-        <h2 className="text-5xl md:text-7xl font-black tracking-tight mb-8">ready to fit?</h2>
-        <button className="bg-white text-black px-12 py-5 rounded-full text-xl font-bold hover:bg-gray-200 transition-width duration-300 transform hover:scale-105">
-          download on app store
-        </button>
-      </div>
-    </section>
-    <Footer />
-  </>
-);
+    images.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+      <Hero />
+      <Features />
+
+      <section className="bg-black text-white py-32 text-center rounded-t-[60px] -mt-10 relative z-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-5xl md:text-7xl font-black tracking-tight mb-8">ready to fit?</h2>
+          <button className="bg-white text-black px-12 py-5 rounded-full text-xl font-bold hover:bg-gray-200 transition-width duration-300 transform hover:scale-105">
+            download on app store
+          </button>
+        </div>
+      </section>
+      <Footer />
+    </>
+  );
+};
 
 function App() {
   return (
