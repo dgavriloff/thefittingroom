@@ -18,7 +18,10 @@
       "bundleIdentifier": "com.dgavriloff.thefittingroom",
       "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "the fitting room needs access to your camera so you can capture photos of your clothes and yourself for virtual try-on sessions.",
+        "NSPhotoLibraryUsageDescription": "the fitting room needs access to your photo library to let you select existing photos of clothes and models for virtual try-on.",
+        "NSPhotoLibraryAddUsageDescription": "the fitting room needs access to your photo library to save your generated virtual try-on images."
       }
     },
     "android": {

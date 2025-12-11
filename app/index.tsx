@@ -13,8 +13,10 @@ import Animated, { FadeIn, FadeOut, interpolate, LinearTransition, useAnimatedSt
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
+  const isTablet = width > 768;
   // Calculate card width for full width with padding
-  const cardWidth = width - 32;
+  const paddingHorizontal = isTablet ? 100 : 16;
+  const cardWidth = width - (paddingHorizontal * 2);
   const scrollViewRef = useRef<ScrollView>(null);
   const [selectedModelImage, setSelectedModelImage] = useState<string | null>(null);
   const [selectedClothes, setSelectedClothes] = useState<{ id: string; url: string }[]>([]);
@@ -430,7 +432,7 @@ export default function TabThreeScreen() {
       <Animated.View style={[{ flex: 1, paddingTop: 50 }, mainContentStyle]}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>the fitting room</Text>
+            <Text style={[styles.title, isTablet && { fontSize: 32 }]}>the fitting room</Text>
           </View>
           <TouchableOpacity onPress={handleToggleSidebar}>
             <MaterialIcons name="menu" size={24} color="#000000" />
@@ -439,7 +441,7 @@ export default function TabThreeScreen() {
 
         <ScrollView
           ref={scrollViewRef}
-          contentContainerStyle={styles.grid}
+          contentContainerStyle={[styles.grid, { paddingHorizontal }]}
           showsVerticalScrollIndicator={false}
           decelerationRate="fast"
           snapToOffsets={snapOffsets}
