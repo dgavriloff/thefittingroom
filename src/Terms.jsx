@@ -16,35 +16,32 @@ const Terms = () => {
                 <div className="space-y-6 text-gray-600 leading-relaxed font-medium">
                     <p>last updated: december 2025</p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">1. agreement to terms</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">1. acceptance of terms</h2>
                     <p>
-                        by accessing our website and using our application, you agree to be bound by these terms of service and our privacy policy.
-                        if you do not agree with any of these terms, you are prohibited from using or accessing this site.
+                        by using the fitting room, you agree to these terms. if you do not agree, please do not use our app.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">2. use license</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">2. service provided</h2>
                     <p>
-                        permission is granted to temporarily download one copy of the materials (information or software) on the fitting room's website
-                        for personal, non-commercial transitory viewing only.
+                        the fitting room provides a virtual try-on experience powered by artificial intelligence (google gemini). we do not guarantee the accuracy
+                        or realism of the generated images. the results are for entertainment and visualization purposes only.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">3. disclaimer</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">3. user responsibility</h2>
                     <p>
-                        the materials on the fitting room's website are provided on an 'as is' basis. the fitting room makes no warranties, expressed or implied,
-                        and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability,
-                        fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                        you are responsible for the photos you upload. by uploading a photo, you confirm that you have the right to use it.
+                        you must not upload illegal, offensive, or inappropriate content.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">4. limitations</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">4. data & privacy</h2>
                     <p>
-                        in no event shall the fitting room or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit,
-                        or due to business interruption) arising out of the use or inability to use the materials on the fitting room's website.
+                        as outlined in our privacy policy, we do not store your photos. they are processed by the google gemini api and then returned to your device.
+                        you retain all rights to your original content.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">5. governing law</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">5. disclaimers</h2>
                     <p>
-                        these terms and conditions are governed by and construed in accordance with the laws of california and you irrevocably submit to the
-                        exclusive jurisdiction of the courts in that state or location.
+                        the service is provided "as is" without warranties of any kind. we are not liable for any damages arising from your use of the app.
                     </p>
                 </div>
             </div>

@@ -16,41 +16,32 @@ const Privacy = () => {
                 <div className="space-y-6 text-gray-600 leading-relaxed font-medium">
                     <p>last updated: december 2025</p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">1. introduction</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">1. no data collection</h2>
                     <p>
-                        welcome to the fitting room ("we," "our," or "us"). we respect your privacy and are committed to protecting your personal data.
-                        this privacy policy will inform you as to how we look after your personal data when you visit our website or use our application
-                        and tell you about your privacy rights and how the law protects you.
+                        we believe in complete privacy. we do not collect, store, or share your personal information. we do not require you to create an account,
+                        and we do not ask for your name, email, or any other private details.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">2. data we collect</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">2. how your photos are used</h2>
                     <p>
-                        we may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:
+                        when you upload a photo to use the virtual try-on feature:
                         <ul className="list-disc ml-6 mt-4 space-y-2">
-                            <li>identity data: includes first name, last name, username or similar identifier.</li>
-                            <li>biometric data: includes body measurements and photos you upload for the virtual try-on feature.</li>
-                            <li>usage data: includes information about how you use our website, products and services.</li>
+                            <li>your photos are sent directly to the google gemini api for processing.</li>
+                            <li>once processed, the result is returned to your device.</li>
+                            <li>we do not store your photos on our servers.</li>
+                            <li>your photos remain stored locally on your own device.</li>
                         </ul>
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">3. how we use your data</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">3. third-party processing</h2>
                     <p>
-                        we will only use your personal data when the law allows us to. most commonly, we will use your personal data in the following circumstances:
-                        <ul className="list-disc ml-6 mt-4 space-y-2">
-                            <li>to provide the virtual try-on service.</li>
-                            <li>to manage your account.</li>
-                            <li>to improve our website and services.</li>
-                        </ul>
+                        we use google gemini to power our virtual try-on technology. by using our service, you acknowledge that your images will be processed by google's AI based on their
+                        <a href="https://policies.google.com/privacy" className="underline hover:text-black ml-1" target="_blank" rel="noopener noreferrer">privacy policy</a>.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">4. data security</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">4. contact us</h2>
                     <p>
-                        we have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
-                    </p>
-
-                    <h2 className="text-2xl font-bold text-black mt-8">5. contact us</h2>
-                    <p>
-                        if you have any questions about this privacy policy or our privacy practices, please contact us at <a href="mailto:denis.gavriloff@gmail.com" className="font-bold underline">denis.gavriloff@gmail.com</a>.
+                        if you have any questions about this privacy policy, please contact us at <a href="mailto:denis.gavriloff@gmail.com" className="font-bold underline">denis.gavriloff@gmail.com</a>.
                     </p>
                 </div>
             </div>
