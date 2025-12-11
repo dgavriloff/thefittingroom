@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fitting Room | Virtual Try-On</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#000000',
+              offwhite: '#F5F5F5', // Light gray/off-white background
+              white: '#FFFFFF',
+              gray: '#86868b' // Muted text
+            }
+          },
+          fontFamily: {
+            sans: ['Lato', 'sans-serif'],
+          },
+          backgroundImage: {
+            'rainbow-gradient': 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 20%, #E0C3FC 40%, #A1C4FD 60%, #B9FBC0 80%, #FDE99D 100%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Lato', sans-serif;
+      background-color: #F5F5F5;
+      color: #000000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

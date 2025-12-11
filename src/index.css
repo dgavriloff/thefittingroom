@@ -1,0 +1,11 @@
+/* Resetted styles - using Tailwind classes mostly */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
