@@ -16,6 +16,8 @@ import Privacy from './Privacy';
 import Terms from './Terms';
 import Demo from './Demo';
 
+const APP_STORE_URL = 'https://apps.apple.com/us/app/the-fitting-room/id6755918606';
+
 const Logo = () => (
   <div className="flex items-center gap-3">
     <div className="relative w-10 h-10">
@@ -46,9 +48,9 @@ const Navbar = () => {
 
         </div>
 
-        <button className="hidden md:flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-900 transition-all transform hover:scale-[1.02]">
+        <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download The Fitting Room app from Apple App Store" className="hidden md:flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-900 transition-all transform hover:scale-[1.02]">
           <span>get the app</span>
-        </button>
+        </a>
 
         <button className="md:hidden text-black" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X /> : <Menu />}
@@ -67,7 +69,7 @@ const Navbar = () => {
               <NavLink href="#how-it-works" onClick={() => setIsOpen(false)}>how it works</NavLink>
               <NavLink href="#features" onClick={() => setIsOpen(false)}>features</NavLink>
 
-              <button className="w-full bg-black text-white py-4 rounded-xl font-bold">get the app</button>
+              <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download The Fitting Room app from Apple App Store" className="w-full bg-black text-white py-4 rounded-xl font-bold block text-center">get the app</a>
             </div>
           </motion.div>
         )}
@@ -114,10 +116,10 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <button className="flex items-center justify-center gap-3 bg-black text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-900 transition-all hover:-translate-y-1">
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download The Fitting Room app from Apple App Store" className="flex items-center justify-center gap-3 bg-black text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-900 transition-all hover:-translate-y-1">
               <Smartphone size={20} />
               download app
-            </button>
+            </a>
             <Link to="/demo" className="flex items-center justify-center gap-3 bg-white text-black border border-gray-200 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-50 transition-all">
               <Scan size={20} />
               view demo
@@ -269,9 +271,9 @@ const Home = () => {
       <section className="bg-black text-white py-32 text-center rounded-t-[60px] -mt-10 relative z-20">
         <div className="container mx-auto px-6">
           <h2 className="text-5xl md:text-7xl font-black tracking-tight mb-8">ready to fit?</h2>
-          <button className="bg-white text-black px-12 py-5 rounded-full text-xl font-bold hover:bg-gray-200 transition-width duration-300 transform hover:scale-105">
+          <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download The Fitting Room app from Apple App Store" className="inline-block bg-white text-black px-12 py-5 rounded-full text-xl font-bold hover:bg-gray-200 transition-width duration-300 transform hover:scale-105">
             download on app store
-          </button>
+          </a>
         </div>
       </section>
       <Footer />
