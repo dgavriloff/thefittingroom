@@ -7,6 +7,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
 import { router, useFocusEffect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
+import * as StoreReview from 'expo-store-review';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, interpolate, LinearTransition, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -186,7 +187,7 @@ export default function TabThreeScreen() {
       clothesImages: selectedClothes.map(c => c.url),
       loading: true,
       initialTab: 'result',
-      estimatedDuration: isProMode ? 45000 : 15000,
+      estimatedDuration: (isProMode ? 45000 : 20000) + (selectedClothes.length * 5000),
     };
 
     setFeedItems(prev => [newItem, ...prev]);
@@ -258,6 +259,22 @@ export default function TabThreeScreen() {
         loading: false,
         resultImage: result.imageUrl
       } : item));
+
+      // Track Generation Count for Review
+      try {
+        const countStr = await AsyncStorage.getItem('@generation_count');
+        const count = countStr ? parseInt(countStr) : 0;
+        const newCount = count + 1;
+        await AsyncStorage.setItem('@generation_count', newCount.toString());
+
+        if (newCount === 4) {
+          if (await StoreReview.isAvailableAsync()) {
+            StoreReview.requestReview();
+          }
+        }
+      } catch (e) {
+        console.error("Failed to track generation count:", e);
+      }
 
     } catch (error: any) {
       const errorMessage = error.message || "Failed to generate image. Please try again.";
