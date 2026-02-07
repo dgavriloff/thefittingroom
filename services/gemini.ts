@@ -1,26 +1,16 @@
-import { GoogleGenAI, Part } from "@google/genai";
 import * as FileSystem from 'expo-file-system/legacy';
-
-const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
-
-if (!apiKey) {
-    console.warn("Warning: No Gemini API Key found.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
-
-const MODEL_NAME = 'gemini-2.5-flash-image';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { apiGenerate, GenerateResponse, ApiError } from './api';
+import { getDeviceId } from './device';
 
 export type AspectRatio = "1:1" | "16:9" | "4:3" | "3:4" | "9:16";
 
 export interface ImageGenerationResult {
     imageUrl: string | null;
     text: string | null;
+    generations?: GenerateResponse['generations'];
 }
 
-/**
- * Generates an image using Gemini 2.5 Flash Image.
- */
 /**
  * Ensures that a URI is local and readable by FileSystem.
  * If it's a remote URI (http/https), it downloads it to the cache.
@@ -34,87 +24,87 @@ const ensureLocalUri = async (uri: string): Promise<string> => {
             return localUri;
         } catch (e) {
             console.warn("Failed to download remote image:", uri, e);
-            // Fallback to original URI, though it will likely fail if it's http
             return uri;
         }
     }
     return uri;
 };
 
+/**
+ * Resizes an image to max 1024px on the longest side and converts to JPEG.
+ */
+const resizeImage = async (uri: string): Promise<string> => {
+    try {
+        const result = await ImageManipulator.manipulateAsync(
+            uri,
+            [{ resize: { width: 1024 } }],
+            { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        return result.uri;
+    } catch (e) {
+        console.warn("Failed to resize image, using original:", e);
+        return uri;
+    }
+};
+
+/**
+ * Generates an image using the server proxy to Gemini API.
+ */
 export const generateImage = async (
     prompt: string,
     imageUris: string[] = [],
     aspectRatio: AspectRatio = "1:1",
     modelName: string = 'gemini-2.5-flash-image'
 ): Promise<ImageGenerationResult> => {
+    const deviceId = await getDeviceId();
+
+    // Prepare images: ensure local, resize, then convert to base64
+    const imageData: { mimeType: string; data: string }[] = [];
+
+    for (const uri of imageUris) {
+        const localUri = await ensureLocalUri(uri);
+        const resizedUri = await resizeImage(localUri);
+        const base64 = await FileSystem.readAsStringAsync(resizedUri, {
+            encoding: 'base64',
+        });
+        imageData.push({
+            mimeType: 'image/jpeg',
+            data: base64,
+        });
+    }
+
     try {
-        const parts: Part[] = [{ text: prompt }];
-
-        for (const uri of imageUris) {
-            const localUri = await ensureLocalUri(uri);
-            const base64 = await FileSystem.readAsStringAsync(localUri, { encoding: 'base64' });
-            parts.push({
-                inlineData: {
-                    mimeType: 'image/jpeg', // Assuming JPEG for simplicity, could detect from URI
-                    data: base64
-                }
-            });
-        }
-
-        const response = await ai.models.generateContent({
-            model: modelName,
-            contents: { parts },
-            config: {
-                imageConfig: {
-                    aspectRatio: aspectRatio,
-                },
-            },
+        const response = await apiGenerate({
+            deviceId,
+            prompt,
+            imageData,
+            aspectRatio,
+            modelName,
         });
 
-        let resultImageUrl: string | null = null;
-        let resultText: string | null = null;
-
-        if (response.candidates && response.candidates.length > 0) {
-            const candidate = response.candidates[0];
-
-            // Check for safety blocking
-            const reason = candidate.finishReason;
-            if (reason === 'SAFETY' || reason === 'IMAGE_SAFETY' || reason === 'BLOCKLIST' || reason === 'PROHIBITED_CONTENT' || reason === 'IMAGE_PROHIBITED_CONTENT') {
-                throw new Error("Image rejected due to safety guidelines. Please contact support if you believe this is a mistake.");
-            }
-
-            if (reason === 'RECITATION') {
-                throw new Error("Image rejected due to copyright/recitation guidelines.");
-            }
-
-            if (reason === 'LANGUAGE') {
-                throw new Error("The request was in an unsupported language.");
-            }
-
-            const content = candidate.content;
-            if (content && content.parts) {
-                for (const part of content.parts) {
-                    if (part.inlineData) {
-                        const base64EncodeString = part.inlineData.data;
-                        resultImageUrl = `data:image/png;base64,${base64EncodeString}`;
-                    } else if (part.text) {
-                        resultText = part.text;
-                    }
-                }
-            }
-        }
-
-        if (!resultImageUrl && !resultText) {
-            // Fallback for other finish reasons or empty response
-            throw new Error("Generation failed. The model returned no content.");
-        }
-
         return {
-            imageUrl: resultImageUrl,
-            text: resultText,
+            imageUrl: response.imageUrl,
+            text: response.text,
+            generations: response.generations,
         };
-
-    } catch (error) {
+    } catch (error: any) {
+        if (error instanceof ApiError) {
+            switch (error.status) {
+                case 402:
+                    throw new Error('NO_GENERATIONS');
+                case 403:
+                    if (error.message.includes('Pro model')) {
+                        throw new Error('PRO_REQUIRED');
+                    }
+                    throw error;
+                case 429:
+                    throw new Error('GENERATION_IN_PROGRESS');
+                case 504:
+                    throw new Error('Generation timed out. Please try again.');
+                default:
+                    throw error;
+            }
+        }
         throw error;
     }
 };

@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { AppProvider } from '@/context/AppContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -49,15 +50,18 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="base-pictures" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="clothes" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="about" options={{ presentation: 'modal', headerShown: false }} />
-        <Stack.Screen name="help" options={{ presentation: 'modal', headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
+    <AppProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="base-pictures" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="clothes" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="about" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="help" options={{ presentation: 'modal', headerShown: false }} />
+          <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: false }} />
+        </Stack>
+      </ThemeProvider>
+    </AppProvider>
   );
 }

@@ -1,5 +1,6 @@
 import EditorCard from '@/components/EditorCard';
 import FeedCard from '@/components/FeedCard';
+import { useApp } from '@/context/AppContext';
 import { AspectRatio, generateImage } from '@/services/gemini';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +15,7 @@ import Animated, { FadeIn, FadeOut, interpolate, LinearTransition, useAnimatedSt
 
 export default function TabThreeScreen() {
   const { width, height } = useWindowDimensions();
+  const { quota, isProSubscriber, totalRemaining, refreshQuota } = useApp();
   const isTablet = width > 768;
   // Calculate card width for full width with padding
   const paddingHorizontal = isTablet ? 100 : 16;
@@ -25,6 +27,7 @@ export default function TabThreeScreen() {
   const [feedLoaded, setFeedLoaded] = useState(false);
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [isProMode, setIsProMode] = useState(false);
+  const [generationCount, setGenerationCount] = useState(0);
 
   // Sidebar State
   const sidebarOpen = useSharedValue(0);
@@ -78,6 +81,17 @@ export default function TabThreeScreen() {
       }
     };
     loadProMode();
+
+    // Load generation count for store review tracking
+    const loadGenerationCount = async () => {
+      try {
+        const countStr = await AsyncStorage.getItem('@generation_count');
+        if (countStr) setGenerationCount(parseInt(countStr) || 0);
+      } catch (e) {
+        console.error('Failed to load generation count', e);
+      }
+    };
+    loadGenerationCount();
   }, []);
 
   useEffect(() => {
@@ -179,6 +193,12 @@ export default function TabThreeScreen() {
       return;
     }
 
+    // Check quota before starting
+    if (totalRemaining <= 0) {
+      router.push('/paywall');
+      return;
+    }
+
     const newId = Date.now().toString();
     const newItem = {
       id: newId,
@@ -217,7 +237,7 @@ export default function TabThreeScreen() {
       scrollViewRef.current?.scrollTo({ y: editorCardHeight + gap, animated: true });
     }, 100);
 
-    // Call Gemini Service
+    // Call Gemini Service (via server proxy)
     try {
       const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and 'garment image(s)'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image(s)'.
 
@@ -253,20 +273,20 @@ export default function TabThreeScreen() {
       const modelName = isProMode ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image';
       const result = await generateImage(prompt, images, aspectRatio, modelName);
 
-
       setFeedItems(prev => prev.map(item => item.id === newId ? {
         ...item,
         loading: false,
         resultImage: result.imageUrl
       } : item));
 
-      // Track Generation Count for Review
-      try {
-        const countStr = await AsyncStorage.getItem('@generation_count');
-        const count = countStr ? parseInt(countStr) : 0;
-        const newCount = count + 1;
-        await AsyncStorage.setItem('@generation_count', newCount.toString());
+      // Refresh quota from server after generation
+      await refreshQuota();
 
+      // Track generation count for store review
+      const newCount = generationCount + 1;
+      setGenerationCount(newCount);
+      try {
+        await AsyncStorage.setItem('@generation_count', newCount.toString());
         if (newCount === 4) {
           if (await StoreReview.isAvailableAsync()) {
             StoreReview.requestReview();
@@ -277,7 +297,21 @@ export default function TabThreeScreen() {
       }
 
     } catch (error: any) {
-      const errorMessage = error.message || "Failed to generate image. Please try again.";
+      let errorMessage = "Failed to generate image. Please try again.";
+
+      if (error.message === 'NO_GENERATIONS') {
+        // Remove the pending item and navigate to paywall
+        setFeedItems(prev => prev.filter(item => item.id !== newId));
+        router.push('/paywall');
+        return;
+      } else if (error.message === 'PRO_REQUIRED') {
+        errorMessage = "Pro mode requires an active subscription.";
+      } else if (error.message === 'GENERATION_IN_PROGRESS') {
+        errorMessage = "A generation is already in progress. Please wait.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       Alert.alert("Generation Failed", errorMessage);
       // Remove the pending item if generation failed
       setFeedItems(prev => prev.filter(item => item.id !== newId));
@@ -527,6 +561,14 @@ export default function TabThreeScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.sidebarContent}>
+          {/* Generations counter / Pro badge */}
+          <TouchableOpacity style={styles.sidebarItem} onPress={() => router.push('/paywall')}>
+            <MaterialIcons name="auto-awesome" size={24} color={isProSubscriber ? '#000000' : '#000000'} />
+            <Text style={styles.sidebarItemText}>
+              {isProSubscriber ? 'Pro Member' : `${totalRemaining} generation${totalRemaining !== 1 ? 's' : ''} left`}
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.sidebarItem}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
               <MaterialIcons name="flash-on" size={24} color="#000000" />
@@ -535,6 +577,10 @@ export default function TabThreeScreen() {
             <Switch
               value={isProMode}
               onValueChange={async (value) => {
+                if (value && !isProSubscriber) {
+                  router.push('/paywall');
+                  return;
+                }
                 setIsProMode(value);
                 try {
                   await AsyncStorage.setItem('@pro_mode', JSON.stringify(value));
@@ -542,8 +588,8 @@ export default function TabThreeScreen() {
                   console.error('Failed to save pro mode', e);
                 }
               }}
-              trackColor={{ false: '#767577', true: '#000000' }}
-              thumbColor={isProMode ? '#FFFFFF' : '#f4f3f4'}
+              trackColor={{ false: '#3A3A3C', true: '#000000' }}
+              thumbColor={isProMode ? '#FFFFFF' : '#E5E5E5'}
             />
           </View>
 
