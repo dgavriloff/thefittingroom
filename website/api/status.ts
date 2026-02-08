@@ -6,7 +6,7 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 5;
 const SUB_MONTHLY_LIMIT = 100;
 
 const RC_PROJECT_ID = '95c0e4e2';

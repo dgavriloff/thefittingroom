@@ -7,9 +7,7 @@ const redis = new Redis({
 });
 
 const CREDIT_PACK_MAP: Record<string, number> = {
-  'credits_5': 5,
-  'credits_20': 20,
-  'credits_50': 50,
+  'credits_25': 25,
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

@@ -13,7 +13,7 @@ const redis = new Redis({
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 5;
 const SUB_MONTHLY_LIMIT = 100;
 const LOCK_TTL = 120; // seconds
 

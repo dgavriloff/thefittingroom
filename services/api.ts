@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'https://thefittingroom.app';
+  process.env.EXPO_PUBLIC_API_URL || 'https://thefittingroom.dgavriloff.com';
 
 const APP_SECRET = process.env.EXPO_PUBLIC_APP_SECRET || '';
 

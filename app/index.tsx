@@ -588,8 +588,8 @@ export default function TabThreeScreen() {
                   console.error('Failed to save pro mode', e);
                 }
               }}
-              trackColor={{ false: '#3A3A3C', true: '#000000' }}
-              thumbColor={isProMode ? '#FFFFFF' : '#E5E5E5'}
+              trackColor={{ false: '#D1D1D6', true: '#000000' }}
+              thumbColor={'#FFFFFF'}
             />
           </View>
 

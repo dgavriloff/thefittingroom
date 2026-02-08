@@ -26,7 +26,7 @@ interface AppContextType {
 
 const defaultQuota: Quota = {
   freeUsed: 0,
-  freeLimit: 3,
+  freeLimit: 5,
   credits: 0,
   subscription: {
     active: false,
@@ -40,7 +40,7 @@ const AppContext = createContext<AppContextType>({
   deviceId: null,
   quota: null,
   isProSubscriber: false,
-  totalRemaining: 3,
+  totalRemaining: 5,
   refreshQuota: async () => {},
   loading: true,
 });
@@ -101,7 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const isProSubscriber = (quota?.subscription?.active ?? false) || clientProEntitlement;
 
   const totalRemaining = (() => {
-    if (!quota) return 3; // Default assumption
+    if (!quota) return 5; // Default assumption
     let remaining = 0;
 
     // Free gens remaining

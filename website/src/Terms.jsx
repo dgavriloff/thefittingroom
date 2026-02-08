@@ -14,7 +14,7 @@ const Terms = () => {
                 <h1 className="text-5xl font-black mb-8">terms of service</h1>
 
                 <div className="space-y-6 text-gray-600 leading-relaxed font-medium">
-                    <p>last updated: december 2025</p>
+                    <p>last updated: february 2026</p>
 
                     <h2 className="text-2xl font-bold text-black mt-8">1. acceptance of terms</h2>
                     <p>
@@ -33,15 +33,37 @@ const Terms = () => {
                         you must not upload illegal, offensive, or inappropriate content.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">4. data & privacy</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">4. purchases & subscriptions</h2>
                     <p>
-                        as outlined in our privacy policy, we do not store your photos. they are processed by the google gemini api and then returned to your device.
-                        you retain all rights to your original content.
+                        the fitting room offers in-app purchases including credit packs and a monthly subscription, processed through apple's app store.
+                        <ul className="list-disc ml-6 mt-4 space-y-2">
+                            <li><strong>free tier:</strong> new users receive 5 free generations.</li>
+                            <li><strong>credit packs:</strong> one-time purchases that add generations to your account. credits do not expire.</li>
+                            <li><strong>pro subscription:</strong> a monthly auto-renewable subscription that provides unlimited generations and access to the pro model. the subscription automatically renews each month unless cancelled at least 24 hours before the end of the current billing period.</li>
+                        </ul>
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">5. disclaimers</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">5. payment & cancellation</h2>
+                    <p>
+                        all payments are processed by apple through your app store account. prices are displayed in your local currency at the time of purchase.
+                        <ul className="list-disc ml-6 mt-4 space-y-2">
+                            <li>subscriptions can be managed and cancelled in your device's settings under subscriptions.</li>
+                            <li>cancellation takes effect at the end of the current billing period. you will retain access until then.</li>
+                            <li>refunds are handled by apple according to their refund policy.</li>
+                            <li>unused free generations and purchased credits are non-refundable.</li>
+                        </ul>
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-black mt-8">6. data & privacy</h2>
+                    <p>
+                        please refer to our <Link to="/privacy" className="underline hover:text-black">privacy policy</Link> for details on how we handle your data.
+                        we collect a device identifier and usage counts to manage your quota. we do not store your photos on our servers.
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-black mt-8">7. disclaimers</h2>
                     <p>
                         the service is provided "as is" without warranties of any kind. we are not liable for any damages arising from your use of the app.
+                        we reserve the right to modify pricing, features, or these terms at any time. continued use of the app after changes constitutes acceptance of the updated terms.
                     </p>
                 </div>
             </div>

@@ -15,9 +15,7 @@ import {
 import { PurchasesPackage } from 'react-native-purchases';
 
 const CREDIT_MAP: Record<string, number> = {
-  credits_5: 5,
-  credits_20: 20,
-  credits_50: 50,
+  credits_25: 25,
 };
 
 function FeatureRow({ text }: { text: string }) {
@@ -196,54 +194,32 @@ export default function PaywallScreen() {
               </TouchableOpacity>
             )}
 
-            {/* Credit Packs */}
-            {creditPkgs.length > 0 && (
-              <View style={styles.creditsSection}>
-                <Text style={styles.creditsSectionTitle}>Or buy credits</Text>
-                <View style={styles.creditsGrid}>
-                  {creditPkgs.map((pkg, index) => {
-                    const creditCount =
-                      CREDIT_MAP[pkg.product.identifier] ??
-                      CREDIT_MAP[pkg.identifier] ??
-                      0;
-                    const perGen =
-                      creditCount > 0
-                        ? (pkg.product.price / creditCount).toFixed(2)
-                        : null;
-                    const isBestValue = index === creditPkgs.length - 1;
-
-                    return (
-                      <TouchableOpacity
-                        key={pkg.identifier}
-                        style={[
-                          styles.creditCard,
-                          isBestValue && styles.creditCardBest,
-                        ]}
-                        onPress={() => handlePurchase(pkg)}
-                        disabled={purchasing}
-                        activeOpacity={0.8}
-                      >
-                        {isBestValue && (
-                          <View style={styles.bestBadge}>
-                            <Text style={styles.bestBadgeText}>BEST VALUE</Text>
-                          </View>
-                        )}
-                        <Text style={styles.creditCount}>{creditCount}</Text>
-                        <Text style={styles.creditLabel}>credits</Text>
-                        <Text style={styles.creditPrice}>
-                          {pkg.product.priceString}
-                        </Text>
-                        {perGen && (
-                          <Text style={styles.creditPerGen}>
-                            ${perGen}/gen
-                          </Text>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-            )}
+            {/* Credit Pack */}
+            {creditPkgs.length > 0 && (() => {
+              const pkg = creditPkgs[0];
+              const creditCount =
+                CREDIT_MAP[pkg.product.identifier] ??
+                CREDIT_MAP[pkg.identifier] ??
+                25;
+              return (
+                <TouchableOpacity
+                  style={styles.creditButton}
+                  onPress={() => handlePurchase(pkg)}
+                  disabled={purchasing}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.creditButtonContent}>
+                    <Text style={styles.creditButtonTitle}>
+                      {creditCount} Credits
+                    </Text>
+                    <Text style={styles.creditButtonPrice}>
+                      {pkg.product.priceString}
+                    </Text>
+                  </View>
+                  <Text style={styles.creditButtonSub}>One-time purchase</Text>
+                </TouchableOpacity>
+              );
+            })()}
           </>
         )}
 
@@ -418,69 +394,34 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  // Credits section
-  creditsSection: {
-    marginBottom: 8,
-  },
-  creditsSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#999',
-    marginBottom: 14,
-    textAlign: 'center',
-  },
-  creditsGrid: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  creditCard: {
-    flex: 1,
+  // Credit button
+  creditButton: {
     backgroundColor: '#FFF',
     borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
+    padding: 20,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#E5E5E5',
   },
-  creditCardBest: {
-    borderColor: '#000',
-    borderWidth: 2,
+  creditButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  bestBadge: {
-    position: 'absolute',
-    top: -9,
-    backgroundColor: '#000',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  bestBadgeText: {
-    fontSize: 9,
+  creditButtonTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#FFF',
-    letterSpacing: 0.5,
-  },
-  creditCount: {
-    fontSize: 28,
-    fontWeight: '800',
     color: '#000',
+  },
+  creditButtonPrice: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+  },
+  creditButtonSub: {
+    fontSize: 13,
+    color: '#999',
     marginTop: 4,
-  },
-  creditLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  creditPrice: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-    marginTop: 10,
-  },
-  creditPerGen: {
-    fontSize: 11,
-    color: '#999',
-    marginTop: 2,
   },
 
   // Restore
