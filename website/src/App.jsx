@@ -52,7 +52,7 @@ const Navbar = () => {
           <span>get the app</span>
         </a>
 
-        <button className="md:hidden text-black" onClick={() => setIsOpen(!isOpen)}>
+        <button className="md:hidden text-black" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu" aria-expanded={isOpen}>
           {isOpen ? <X /> : <Menu />}
         </button>
       </div>
@@ -158,12 +158,12 @@ const Hero = () => {
 
               {/* Clothes Cards */}
               {[
-                "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=300",
-                "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=300",
-                "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=300"
-              ].map((src, i) => (
+                { src: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=300", alt: "Model wearing loose pink pants, hands in pocket" },
+                { src: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=300", alt: "Model holding a brown zip-up jacket on a hanger" },
+                { src: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=300", alt: "White t-shirt with blue graphic and blue text that says ORIGINAL" }
+              ].map((item, i) => (
                 <div key={i} className="aspect-[3/4] rounded-3xl bg-gray-50 overflow-hidden relative group">
-                  <img src={src} alt="Cloth" className="w-full h-full object-cover" />
+                  <img src={item.src} alt={item.alt} className="w-full h-full object-cover" />
                   <div className="absolute top-3 right-3 w-6 h-6 bg-black rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                     <Check size={12} />
                   </div>

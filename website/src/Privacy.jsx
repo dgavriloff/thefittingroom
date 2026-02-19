@@ -40,7 +40,20 @@ const Privacy = () => {
                         </ul>
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">3. third-party services</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">3. face data</h2>
+                    <p>
+                        our app allows users to upload full-body photos of themselves for virtual try-on. these photos may contain faces, but we want to be clear about how this data is handled:
+                        <ul className="list-disc ml-6 mt-4 space-y-2">
+                            <li>we do not perform facial recognition, facial mapping, or biometric analysis of any kind.</li>
+                            <li>we do not extract, collect, or store facial geometry, faceprints, or any biometric identifiers.</li>
+                            <li>user photos (which may include faces) are sent to google gemini solely to generate a virtual try-on image. the face in the photo is preserved as-is in the output and is not analyzed or used for identification.</li>
+                            <li>photos are transmitted to google gemini for real-time processing only and are not stored on our servers.</li>
+                            <li>we do not share face data or user photos with any third party other than google gemini for the purpose of generating the try-on result.</li>
+                            <li>we retain no user photos or face data on our servers. photos are stored locally on the user's device only.</li>
+                        </ul>
+                    </p>
+
+                    <h2 className="text-2xl font-bold text-black mt-8">4. third-party services</h2>
                     <p>
                         we use the following third-party services:
                         <ul className="list-disc ml-6 mt-4 space-y-2">
@@ -52,12 +65,12 @@ const Privacy = () => {
                         </ul>
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">4. data retention</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">5. data retention</h2>
                     <p>
                         device identifiers and usage counts are retained as long as they are needed to provide the service. subscription usage data expires automatically after 45 days. we do not sell or share your data with third parties for advertising purposes.
                     </p>
 
-                    <h2 className="text-2xl font-bold text-black mt-8">5. contact us</h2>
+                    <h2 className="text-2xl font-bold text-black mt-8">6. contact us</h2>
                     <p>
                         if you have any questions about this privacy policy, please contact us at <a href="mailto:denis.gavriloff@gmail.com" className="font-bold underline">denis.gavriloff@gmail.com</a>.
                     </p>

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -231,6 +232,17 @@ export default function PaywallScreen() {
         >
           <Text style={styles.restoreText}>Restore Purchases</Text>
         </TouchableOpacity>
+
+        {/* Legal links (required by App Store for subscriptions) */}
+        <View style={styles.legalLinks}>
+          <TouchableOpacity onPress={() => Linking.openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')}>
+            <Text style={styles.legalText}>Terms of Use (EULA)</Text>
+          </TouchableOpacity>
+          <Text style={styles.legalSeparator}>|</Text>
+          <TouchableOpacity onPress={() => Linking.openURL('https://thefittingroom.dgavriloff.com/privacy')}>
+            <Text style={styles.legalText}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {purchasing && (
@@ -433,6 +445,24 @@ const styles = StyleSheet.create({
   restoreText: {
     fontSize: 14,
     color: '#AAA',
+  },
+
+  // Legal links
+  legalLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    paddingBottom: 8,
+  },
+  legalText: {
+    fontSize: 12,
+    color: '#AAA',
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    fontSize: 12,
+    color: '#CCC',
   },
 
   // Overlay
